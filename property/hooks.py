@@ -54,6 +54,8 @@ app_license = "GNU"
 
 # notification_config = "property.notifications.get_notification_config"
 
+fixtures = ["Custom Field","Workflow State", "Workflow Action", "Workflow", "Role"]
+
 # Permissions
 # -----------
 # Permissions evaluated in scripted ways
@@ -110,4 +112,3 @@ app_license = "GNU"
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "property.event.get_events"
 # }
-
