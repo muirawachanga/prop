@@ -1,0 +1,74 @@
+[
+ {
+  "docstatus": 0, 
+  "doctype": "Workflow State", 
+  "icon": "question-sign", 
+  "modified": "2016-03-05 01:04:39.402707", 
+  "name": "Pending", 
+  "style": "", 
+  "workflow_state_name": "Pending"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Workflow State", 
+  "icon": "ok-sign", 
+  "modified": "2016-03-05 01:04:39.405099", 
+  "name": "Approved", 
+  "style": "Success", 
+  "workflow_state_name": "Approved"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Workflow State", 
+  "icon": "remove", 
+  "modified": "2016-03-05 01:04:39.407579", 
+  "name": "Rejected", 
+  "style": "Danger", 
+  "workflow_state_name": "Rejected"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Workflow State", 
+  "icon": "", 
+  "modified": "2016-03-08 15:11:51.137346", 
+  "name": "New", 
+  "style": "Warning", 
+  "workflow_state_name": "New"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Workflow State", 
+  "icon": "", 
+  "modified": "2016-03-07 21:45:11.697887", 
+  "name": "Active", 
+  "style": "Success", 
+  "workflow_state_name": "Active"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Workflow State", 
+  "icon": "", 
+  "modified": "2016-03-08 15:11:26.993046", 
+  "name": "Suspended", 
+  "style": "Danger", 
+  "workflow_state_name": "Suspended"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Workflow State", 
+  "icon": "", 
+  "modified": "2016-03-07 21:57:30.985833", 
+  "name": "Terminated", 
+  "style": "Info", 
+  "workflow_state_name": "Terminated"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Workflow State", 
+  "icon": "", 
+  "modified": "2016-03-08 15:11:04.937606", 
+  "name": "Cancelled", 
+  "style": "Inverse", 
+  "workflow_state_name": "Cancelled"
+ }
+]
