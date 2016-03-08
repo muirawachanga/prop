@@ -5,6 +5,12 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe import _, DoesNotExistError
+from frappe import db
 
 class OwnerContract(Document):
-	pass
+
+	def validate(self):
+
+		if db.get_value("Owner Contract", {"name": self.name}, "status") in ["Cancelled", "Terminated"]:
+			frappe.throw(_('Cannot modify contracts in this status.'))
