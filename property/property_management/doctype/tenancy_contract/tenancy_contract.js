@@ -2,37 +2,38 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Tenancy Contract', {
-	refresh: function(frm) {
-		if(frm.doc.status == "Cancelled" || frm.doc.status == "Terminated" || frm.doc.status == "Active"){
-				frm.set_df_property("start_date", "read_only", 1);
-				frm.set_df_property("end_date", "read_only", 1);
-				frm.set_df_property("property_unit", "read_only", 1);
-				frm.set_df_property("tenancy_customer", "read_only", 1);
-		}
-		if(frm.doc.status == "Cancelled" || frm.doc.status == "Terminated"){
-				frm.set_df_property("termination_date", "read_only", 1);
-		}
-	},
-	validate: function(frm) {
-		if (!frm.doc.start_date && frm.doc.status == "Active"){
-			msgprint(__("You must set the contract start date before approving"));
-			validated = false;
-			return
-		}
-		if (!frm.doc.end_date && frm.doc.status == "Active"){
-			msgprint(__("You must set the contract end date before approving"));
-			validated = false;
-			return
-		}
-		if (!frm.doc.termination_date && frm.doc.status == "Terminated"){
-			msgprint(__("You must set the termination date before terminating"));
-			validated = false;
-			return
-		}
-		if (!frm.doc.cancellation_date && frm.doc.status == "Cancelled"){
-			msgprint(__("You must set the cancellation date before cancelling"));
-			validated = false;
-			return
-		}
-	}
+  refresh: function(frm) {
+    if (frm.doc.status == 'Active') {
+      frm.add_custom_button(__("Create Invoice"), function() {
+        frm.events.make_invoice(frm)
+      }).addClass("btn-primary");
+    }
+  },
+
+  make_invoice: function(frm) {
+    frappe.model.open_mapped_doc({
+      method: "property.property_management.doctype.tenancy_contract.tenancy_contract.make_sales_invoice",
+      frm: frm
+    })
+  }
 });
+
+cur_frm.cscript.item_code = function(doc, cdt, cdn) {
+  var d = locals[cdt][cdn];
+  if (d.item_code) {
+    return frappe.call({
+      method: "property.property_management.doctype.tenancy_contract.tenancy_contract.get_item_details",
+      args: {
+        "item_code": d.item_code
+      },
+      callback: function(r, rt) {
+        if (r.message) {
+          $.each(r.message, function(k, v) {
+            frappe.model.set_value(cdt, cdn, k, v);
+          });
+          refresh_field('image_view', d.name, 'items');
+        }
+      }
+    })
+  }
+}

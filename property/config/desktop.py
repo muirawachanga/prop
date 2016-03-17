@@ -6,9 +6,9 @@ def get_data():
 	return [
 		{
 			"module_name": "Property Management",
-			"color": "green",
-			"icon": "octicon octicon-building",
+			"color": "#728C00",
+			"icon": "octicon octicon-home",
 			"type": "module",
-			"label": _("Property Management")
+			"label": _("Property")
 		}
 	]

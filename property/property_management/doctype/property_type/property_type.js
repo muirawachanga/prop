@@ -3,6 +3,6 @@
 
 frappe.ui.form.on('Property Type', {
 	refresh: function(frm) {
-
+		console.log("TRYYY")
 	}
 });

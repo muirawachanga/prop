@@ -1,5 +1,6 @@
 // Copyright (c) 2016, Bituls Company Limited and contributors
 // For license information, please see license.txt
+cur_frm.add_fetch("owner_customer", "customer_name", "customer_name" );
 
 frappe.ui.form.on('Owner Contract', {
 	refresh: function(frm) {
