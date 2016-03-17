@@ -54,7 +54,7 @@ app_license = "GNU"
 
 # notification_config = "property.notifications.get_notification_config"
 
-fixtures = ["Custom Field","Workflow State", "Workflow Action", "Workflow", "Role"]
+fixtures = ["Custom Field","Workflow State", "Workflow Action", "Workflow", "Role", "Customer Group", "Item Group"]
 
 # Permissions
 # -----------

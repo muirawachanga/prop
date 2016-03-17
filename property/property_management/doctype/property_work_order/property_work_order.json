@@ -335,10 +335,10 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-09 19:12:28.962416", 
- "modified_by": "alex.nganga@bituls.com", 
+ "modified": "2016-03-17 11:01:45.865350", 
+ "modified_by": "Administrator", 
  "module": "Property Management", 
- "name": "Work Order", 
+ "name": "Property Work Order", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [

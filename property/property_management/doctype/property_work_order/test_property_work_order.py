@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
-# test_records = frappe.get_test_records('Work Order')
+# test_records = frappe.get_test_records('Property Work Order')
 
-class TestWorkOrder(unittest.TestCase):
+class TestPropertyWorkOrder(unittest.TestCase):
 	pass
