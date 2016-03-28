@@ -9,13 +9,15 @@ from frappe.utils import today, flt
 from frappe.model.mapper import get_mapped_doc
 
 class TenancyContract(Document):
-	pass
+
+	def validate(self):
+		pass
 
 
 
 @frappe.whitelist()
 def get_item_details(item_code):
-	item = frappe.db.sql("""select item_name, stock_uom, image, description, item_group, brand
+	item = frappe.db.sql("""select item_name, stock_uom, image, description, item_group, brand, income_account, selling_cost_center
 		from `tabItem` where name = %s""", item_code, as_dict=1)
 	return {
 		'item_name': item and item[0]['item_name'] or '',
@@ -23,7 +25,9 @@ def get_item_details(item_code):
 		'description': item and item[0]['description'] or '',
 		'image': item and item[0]['image'] or '',
 		'item_group': item and item[0]['item_group'] or '',
-		'brand': item and item[0]['brand'] or ''
+		'brand': item and item[0]['brand'] or '',
+		'income_account': item and item[0]['income_account'] or '',
+		'cost_center': item and item[0]['selling_cost_center'] or ''
 	}
 
 @frappe.whitelist()
@@ -83,8 +87,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		}
 	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
 	print doclist
-	doclist.tenency_contract = source_name
-	doclist.submit()
+	#doclist.submit()
 	return doclist
 
 def __generate_invoice(contract):

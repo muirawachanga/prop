@@ -15,6 +15,27 @@ frappe.ui.form.on('Tenancy Contract', {
       method: "property.property_management.doctype.tenancy_contract.tenancy_contract.make_sales_invoice",
       frm: frm
     })
+  },
+  start_date: function(frm) {
+    if (frm.doc.start_date) {
+      frm.set_value('date_of_first_billing', frm.doc.start_date);
+      var msg = __('Date of First Billing set to: ') + frm.doc.start_date + __('. Note that you can select a different date if you wish.');
+      msgprint(msg);
+    } else {
+
+    }
+  },
+  property_unit: function(frm) {
+    if (!frm.doc.property_unit) {
+      frm.set_value("property_name", "");
+      frm.set_value("property_unit_name", "");
+    }
+    frappe.model.get_value("Property Unit", frm.doc.property_unit, "property", function(value) {
+      frappe.model.with_doc("Property", value.property, function(r) {
+        var p = frappe.model.get_doc("Property", value.property);
+        frm.set_value("property_name", p.property_name);
+      });
+    });
   }
 });
 

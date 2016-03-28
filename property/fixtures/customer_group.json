@@ -112,8 +112,8 @@
   "doctype": "Customer Group", 
   "is_group": "No", 
   "lft": 12, 
-  "modified": "2016-03-17 10:35:30.301076", 
-  "name": "Property Owner", 
+  "modified": "2016-03-23 15:18:34.317112", 
+  "name": "Landlords", 
   "old_parent": "All Customer Groups", 
   "parent_customer_group": "All Customer Groups", 
   "rgt": 13
