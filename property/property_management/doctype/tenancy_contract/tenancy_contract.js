@@ -1,14 +1,44 @@
 // Copyright (c) 2016, Bituls Company Limited and contributors
 // For license information, please see license.txt
 
+cur_frm.cscript.tax_table = "Sales Taxes and Charges";
+{% include 'accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.js' %}
+
 frappe.ui.form.on('Tenancy Contract', {
+
   refresh: function(frm) {
-    if (frm.doc.status == 'Active') {
+    if (frm.doc.contract_status == 'Active' || frm.doc.contract_status == 'Suspended') {
       frm.add_custom_button(__("Create Invoice"), function() {
         frm.events.make_invoice(frm)
       }).addClass("btn-primary");
     }
-  },
+
+		if(frm.doc.contract_status != "New"){
+        frm.toggle_enable('*',0);
+        frm.toggle_enable(['items','grace_period','auto_generate_invoice', 'email_invoice', 'taxes_and_charges', 'taxes'],1);
+				frm.disable_save();
+		}
+	},
+	validate: function(frm) {
+		if (!frm.doc.start_date && frm.doc.contract_status == "Active"){
+			msgprint(__("You must set the contract start date before approving"));
+			validated = false;
+			return
+		}
+		if (!frm.doc.end_date && frm.doc.contract_status == "Active"){
+			msgprint(__("You must set the contract end date before approving"));
+			validated = false;
+			return
+		}
+		if (!frm.doc.termination_date && frm.doc.contract_status == "Terminated"){
+			frm.set_value('terminated_date', get_today());
+			validated = true;
+		}
+		if (!frm.doc.cancellation_date && frm.doc.contract_status == "Cancelled"){
+			frm.set_value('cancellation_date', get_today());
+			validated = true;
+		}
+	},
 
   make_invoice: function(frm) {
     frappe.model.open_mapped_doc({
@@ -23,6 +53,26 @@ frappe.ui.form.on('Tenancy Contract', {
       msgprint(msg);
     } else {
 
+    }
+  },
+  end_date: function(frm){
+    if (frm.doc.start_date) {
+      if(frappe.datetime.get_diff(frm.doc.start_date, frm.doc.end_date) > 0){
+        msgprint(__('End date cannot be earlier than start date.'));
+        frm.set_value('end_date', '');
+      }
+      if(frappe.datetime.get_diff(frm.doc.date_of_first_billing, frm.doc.end_date) > 0){
+        msgprint(__('End date cannot be earlier than Date of First Billing.'));
+        frm.set_value('end_date', '');
+      }
+    }
+  },
+  date_of_first_billing: function(frm){
+    if (frm.doc.start_date) {
+      if(frappe.datetime.get_diff(frm.doc.start_date, frm.doc.date_of_first_billing) > 0){
+        msgprint(__('Date of First Billing cannot be earlier than start date.'));
+        frm.set_value('date_of_first_billing', '');
+      }
     }
   },
   property_unit: function(frm) {

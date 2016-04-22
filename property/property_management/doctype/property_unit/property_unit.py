@@ -7,4 +7,6 @@ import frappe
 from frappe.model.document import Document
 
 class PropertyUnit(Document):
-	pass
+	def validate(self):
+		combo_name = self.property_name + ' - ' + self.unit_name
+		self.unit_name = combo_name

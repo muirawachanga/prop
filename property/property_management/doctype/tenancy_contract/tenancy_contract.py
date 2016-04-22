@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils import today, flt
-from frappe.model.mapper import get_mapped_doc
+from frappe.model.mapper import get_mapped_doc, _
 
 class TenancyContract(Document):
 
@@ -50,6 +50,9 @@ def generate_invoice(dn):
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
+
+	verify_items(source_name)
+
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		#Get the advance paid Journal Entries in Sales Invoice Advance
@@ -80,25 +83,13 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		"Tenancy Contract Item": {
 			"doctype": "Sales Invoice Item",
 			"postprocess": update_item
-		},
-		"Sales Taxes and Charges": {
-			"doctype": "Sales Taxes and Charges",
-			"add_if_empty": True
 		}
 	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
 	print doclist
 	#doclist.submit()
 	return doclist
 
-def __generate_invoice(contract):
-	contract = frappe.get_doc('Tenancy Contract', contract.name)
-	c_items = contract.items
-	items = []
-	for c_item in c_items:
-		item = frappe.get_doc('Item', c_item.item_code)
-		items.append(item)
-
-
-
-def __send_email(inv, c):
-	pass
+def verify_items(name):
+	tc = frappe.get_doc("Tenancy Contract", name)
+	if not len(tc.items):
+		frappe.msgprint(_('No Contract Items to invoice for this contract.'),raise_exception=1)
