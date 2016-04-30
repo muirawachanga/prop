@@ -1,9 +1,6 @@
 // Copyright (c) 2016, Bituls Company Limited and contributors
 // For license information, please see license.txt
 
-cur_frm.cscript.tax_table = "Sales Taxes and Charges";
-{% include 'accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.js' %}
-
 frappe.ui.form.on('Tenancy Contract', {
 
   refresh: function(frm) {
@@ -86,6 +83,9 @@ frappe.ui.form.on('Tenancy Contract', {
         frm.set_value("property_name", p.property_name);
       });
     });
+  },
+  taxes_and_charges: function(frm) {
+    console.log(frm);
   }
 });
 
