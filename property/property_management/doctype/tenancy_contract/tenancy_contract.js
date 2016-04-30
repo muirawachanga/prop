@@ -13,7 +13,7 @@ frappe.ui.form.on('Tenancy Contract', {
 		if(frm.doc.contract_status != "New"){
         frm.toggle_enable('*',0);
         frm.toggle_enable(['items','grace_period','auto_generate_invoice', 'email_invoice', 'taxes_and_charges', 'taxes'],1);
-				frm.disable_save();
+				//frm.disable_save();
 		}
 	},
 	validate: function(frm) {
@@ -83,9 +83,6 @@ frappe.ui.form.on('Tenancy Contract', {
         frm.set_value("property_name", p.property_name);
       });
     });
-  },
-  taxes_and_charges: function(frm) {
-    console.log(frm);
   }
 });
 
