@@ -7,5 +7,14 @@
   "name": "Item-Client", 
   "script": "\ncur_frm.add_fetch(\"property\", \"property_name\", \"property_name\");\n\nfrappe.ui.form.on(\"Item\", {\n  property: function(frm) {\n    if (frm.doc.property) {\n      frappe.model.get_value(\"Property\", frm.doc.property, \"property_name\", function(value) {\n        if (!frm.doc.item_code) {\n          frm.set_value(\"item_code\", value.property_name + \"-\");\n        } else {\n          var ic = frm.doc.item_code;\n          var pos = ic.indexOf('-');\n          if(pos > -1){\n            /*We had the property set before... clear it*/\n            ic = ic.slice(pos+1);\n          }\n          frm.set_value(\"item_code\", value.property_name + \"-\" + ic);\n          frm.set_value(\"item_name\", value.property_name + \"-\" + ic);\n          frm.set_value(\"description\", value.property_name + \"-\" + ic);\n        }\n        frm.set_value(\"is_stock_item\", 0);\n      });\n\n      frappe.model.get_value(\"Property\", frm.doc.property, \"trust_fund_account\", function(value) {\n        frm.set_value(\"income_account\", value.trust_fund_account);\n        frm.fields_dict[\"income_account\"].df.reqd = 1;\n      });\n\n      frappe.model.get_value(\"Property\", frm.doc.property, \"property_cost_center\", function(value) {\n        frm.set_value(\"selling_cost_center\", value.property_cost_center);\n        frm.fields_dict[\"selling_cost_center\"].df.reqd = 1;\n      });\n    } else {\n      /*User deleted the property field contents. Reset everything....*/\n      frm.set_value(\"item_code\", \"\");\n      frm.set_value(\"item_name\", \"\");\n      frm.set_value(\"is_stock_item\", 1);\n      frm.set_value(\"income_account\", \"\");\n      frm.set_value(\"selling_cost_center\", \"\");\n      frm.fields_dict[\"income_account\"].df.reqd = 0;\n      frm.fields_dict[\"selling_cost_center\"].df.reqd = 0;\n      frm.refresh_fields();\n    }\n  }\n});\n", 
   "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "Sales Invoice", 
+  "modified": "2016-05-01 17:51:35.305573", 
+  "name": "Sales Invoice-Client", 
+  "script": "cur_frm.add_fetch(\"tenancy_contract\", \"property_unit_name\", \"property_unit\");", 
+  "script_type": "Client"
  }
 ]
