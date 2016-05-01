@@ -74,7 +74,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		"Tenancy Contract": {
 			"doctype": "Sales Invoice",
 			"field_map": {
-				"party_account_currency": "party_account_currency"
+				"party_account_currency": "party_account_currency",
+				"property_unit_name": "property_unit"
 			},
 			"validation": {
 				"contract_status": ["=", "Active"]
@@ -88,8 +89,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			"add_if_empty": True
 		}
 	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
-	print doclist
-	#doclist.submit()
+	doclist.submit()
 	return doclist
 
 def verify_items(name):
