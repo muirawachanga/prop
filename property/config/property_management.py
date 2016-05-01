@@ -47,16 +47,10 @@ def get_data():
 					"name": "Property Work Order",
 					"description": _("Generate work orders for works to be done in a property")
 				},
-			]
-		},
-		{
-			"label": _("Tools"),
-			"icon": "icon-wrench",
-			"items": [
 				{
 					"type": "doctype",
-					"name": "Landlord Remmitance",
-					"description": _("Generate and pay Landlords from paid rental invoices.")
+					"name": "Landlord Remittance",
+					"description": _("Generate work orders for works to be done in a property")
 				},
 			]
 		},
