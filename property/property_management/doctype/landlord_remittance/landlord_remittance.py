@@ -6,13 +6,17 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils import flt
-from frappe import msgprint, _
+from frappe import msgprint, _, throw
 
 class LandlordRemittance(Document):
 
 	def get_remit_flags(self,item, tc):
 		tc_item = frappe.db.sql("""select * from `tabTenancy Contract Item` tci where item_code = '%s' and parent = '%s';
 								""" %(item.item_code, tc), as_dict=1)
+		if not len(tc_item):
+			#This item is not in the Tenancy Contract. No remitting.
+			return (False, False)
+
 		return (True if tc_item[0].remmitable else False, True if tc_item[0].remit_full_amount else False,)
 
 	def get_collections(self, invoices):
@@ -49,8 +53,6 @@ class LandlordRemittance(Document):
 					nl.is_remittable = 0
 				if r_flags[1]:
 					nl.remit_full_amount = 1
-
-
 
 			remittable_collections = flt(remittable_collections) + flt(ci.remittance_amount)
 			total_collections = flt(total_collections) + flt(ci.grand_total)
@@ -139,8 +141,19 @@ class LandlordRemittance(Document):
 		if not (self.owner_contract):
 			msgprint(_("Owner Contract is mandatory and should be selected."))
 			return
-		#Get all invoices that have been paid but not already been remitted
+		#Get all invoices that have been generated but not already been remitted
 		inv_query = """select ti.name as invoice_name, tp.property_name, tu.unit_name, tc.customer,
+											tc.name as contract_name, ti.posting_date, ti.outstanding_amount, ti.grand_total from
+											`tabSales Invoice` ti, `tabOwner Contract` td, `tabProperty` tp, `tabProperty Unit` tu,
+											`tabTenancy Contract` tc where ti.tenancy_contract = tc.name and tc.property_unit = tu.name
+											and tu.property = tp.name and td.property = tp.name and td.name = '%s' and ti.name not in
+											(select lc.invoice from `tabLandlord Collection Invoices` lc, `tabLandlord Remittance` lr where lr.owner_contract = '%s'
+											and lr.name = lc.parent)
+											order by tc.customer, ti.posting_date;
+											""" %(self.owner_contract, self.owner_contract)
+
+		if self.exclude_unpaid_invoices:
+			inv_query = """select ti.name as invoice_name, tp.property_name, tu.unit_name, tc.customer,
 											tc.name as contract_name, ti.posting_date, ti.outstanding_amount, ti.grand_total from
 											`tabSales Invoice` ti, `tabOwner Contract` td, `tabProperty` tp, `tabProperty Unit` tu,
 											`tabTenancy Contract` tc where ti.tenancy_contract = tc.name and tc.property_unit = tu.name
@@ -149,16 +162,6 @@ class LandlordRemittance(Document):
 											and lr.name = lc.parent) and ti.outstanding_amount = 0
 											order by tc.customer, ti.posting_date;
 											""" %(self.owner_contract, self.owner_contract)
-		if self.include_unpaid_invoices:
-			inv_query = """select ti.name as invoice_name, tp.property_name, tu.unit_name, tc.customer,
-												tc.name as contract_name, ti.posting_date, ti.outstanding_amount, ti.grand_total from
-												`tabSales Invoice` ti, `tabOwner Contract` td, `tabProperty` tp, `tabProperty Unit` tu,
-												`tabTenancy Contract` tc where ti.tenancy_contract = tc.name and tc.property_unit = tu.name
-												and tu.property = tp.name and td.property = tp.name and td.name = '%s' and ti.name not in
-												(select lc.invoice from `tabLandlord Collection Invoices` lc, `tabLandlord Remittance` lr where lr.owner_contract = '%s'
-												and lr.name = lc.parent)
-												order by tc.customer, ti.posting_date;
-												""" %(self.owner_contract, self.owner_contract)
 
 		collection_invoices = frappe.db.sql(inv_query, as_dict=1)
 
