@@ -35,6 +35,17 @@ frappe.ui.form.on('Tenancy Contract', {
 			frm.set_value('cancellation_date', get_today());
 			validated = true;
 		}
+    if (frm.doc.contract_status != "New"){
+      var items = frm.doc.items;
+      for (var i=0; i < items.length; i++){
+        if(items[i].__islocal){
+          msgprint(__("You cannot add a new billing item to a contract in this status. Not Saved."));
+          validated = false;
+          return;
+        }
+      }
+      validated = true;
+    }
 	},
 
   make_invoice: function(frm) {
@@ -86,6 +97,7 @@ frappe.ui.form.on('Tenancy Contract', {
   }
 });
 
+
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];
   if (d.item_code) {
@@ -104,4 +116,4 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
       }
     })
   }
-}
+};
