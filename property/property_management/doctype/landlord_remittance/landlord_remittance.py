@@ -145,7 +145,7 @@ class LandlordRemittance(Document):
 		inv_query = """select ti.name as invoice_name, tp.property_name, tu.unit_name, tc.customer,
 											tc.name as contract_name, ti.posting_date, ti.outstanding_amount, ti.grand_total from
 											`tabSales Invoice` ti, `tabOwner Contract` td, `tabProperty` tp, `tabProperty Unit` tu,
-											`tabTenancy Contract` tc where ti.tenancy_contract = tc.name and tc.property_unit = tu.name
+											`tabTenancy Contract` tc where ti.docstatus = 1 and ti.tenancy_contract = tc.name and tc.property_unit = tu.name
 											and tu.property = tp.name and td.property = tp.name and td.name = '%s' and ti.name not in
 											(select lc.invoice from `tabLandlord Collection Invoices` lc, `tabLandlord Remittance` lr where lr.owner_contract = '%s'
 											and lr.name = lc.parent)
@@ -156,7 +156,7 @@ class LandlordRemittance(Document):
 			inv_query = """select ti.name as invoice_name, tp.property_name, tu.unit_name, tc.customer,
 											tc.name as contract_name, ti.posting_date, ti.outstanding_amount, ti.grand_total from
 											`tabSales Invoice` ti, `tabOwner Contract` td, `tabProperty` tp, `tabProperty Unit` tu,
-											`tabTenancy Contract` tc where ti.tenancy_contract = tc.name and tc.property_unit = tu.name
+											`tabTenancy Contract` tc where ti.docstatus = 1 and ti.tenancy_contract = tc.name and tc.property_unit = tu.name
 											and tu.property = tp.name and td.property = tp.name and td.name = '%s' and ti.name not in
 											(select lc.invoice from `tabLandlord Collection Invoices` lc, `tabLandlord Remittance` lr where lr.owner_contract = '%s'
 											and lr.name = lc.parent) and ti.outstanding_amount = 0
