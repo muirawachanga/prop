@@ -89,7 +89,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			"add_if_empty": True
 		}
 	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
-	doclist.submit()
+
 	return doclist
 
 def verify_items(name):
