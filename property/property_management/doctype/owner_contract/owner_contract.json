@@ -599,7 +599,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-30 22:58:30.387627", 
+ "modified": "2016-06-15 21:18:14.058127", 
  "modified_by": "Administrator", 
  "module": "Property Management", 
  "name": "Owner Contract", 
@@ -609,7 +609,7 @@
   {
    "amend": 0, 
    "apply_user_permissions": 0, 
-   "cancel": 1, 
+   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -623,7 +623,7 @@
    "role": "Property Manager", 
    "set_user_permissions": 0, 
    "share": 1, 
-   "submit": 1, 
+   "submit": 0, 
    "write": 1
   }
  ], 
@@ -631,5 +631,5 @@
  "read_only_onload": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
- "title_field": "customer_name"
+ "title_field": "property_name"
 }
