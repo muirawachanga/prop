@@ -148,7 +148,7 @@ class LandlordRemittance(Document):
 											`tabTenancy Contract` tc where ti.docstatus = 1 and ti.tenancy_contract = tc.name and tc.property_unit = tu.name
 											and tu.property = tp.name and td.property = tp.name and td.name = '%s' and ti.name not in
 											(select lc.invoice from `tabLandlord Collection Invoices` lc, `tabLandlord Remittance` lr where lr.owner_contract = '%s'
-											and lr.name = lc.parent)
+											and lr.name = lc.parent and lc.docstatus <> 2)
 											order by tc.customer, ti.posting_date;
 											""" %(self.owner_contract, self.owner_contract)
 
@@ -159,7 +159,7 @@ class LandlordRemittance(Document):
 											`tabTenancy Contract` tc where ti.docstatus = 1 and ti.tenancy_contract = tc.name and tc.property_unit = tu.name
 											and tu.property = tp.name and td.property = tp.name and td.name = '%s' and ti.name not in
 											(select lc.invoice from `tabLandlord Collection Invoices` lc, `tabLandlord Remittance` lr where lr.owner_contract = '%s'
-											and lr.name = lc.parent) and ti.outstanding_amount = 0
+											and lr.name = lc.parent and lc.docstatus <> 2) and ti.outstanding_amount = 0
 											order by tc.customer, ti.posting_date;
 											""" %(self.owner_contract, self.owner_contract)
 
