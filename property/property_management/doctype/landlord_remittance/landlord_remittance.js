@@ -9,7 +9,7 @@ frappe.ui.form.on('Landlord Remittance', {
   },
 
   onload: function(frm) {
-    if(frm.is_local){
+    if(!frm.doc.period_start){
       var today = new Date();
       var start_date = new Date(today.getFullYear(), today.getMonth(), 1);
       var end_date = new Date(today.getFullYear(), today.getMonth() + 1, 0);
