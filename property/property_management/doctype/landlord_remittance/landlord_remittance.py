@@ -146,22 +146,24 @@ class LandlordRemittance(Document):
 											tc.name as contract_name, ti.posting_date, ti.outstanding_amount, ti.grand_total from
 											`tabSales Invoice` ti, `tabOwner Contract` td, `tabProperty` tp, `tabProperty Unit` tu,
 											`tabTenancy Contract` tc where ti.docstatus = 1 and ti.tenancy_contract = tc.name and tc.property_unit = tu.name
-											and tu.property = tp.name and td.property = tp.name and td.name = '%s' and ti.name not in
+											and tu.property = tp.name and td.property = tp.name and td.name = '%s' and ti.posting_date between '%s' and '%s'
+											and ti.name not in
 											(select lc.invoice from `tabLandlord Collection Invoices` lc, `tabLandlord Remittance` lr where lr.owner_contract = '%s'
 											and lr.name = lc.parent and lc.docstatus <> 2)
 											order by tc.customer, ti.posting_date;
-											""" %(self.owner_contract, self.owner_contract)
+											""" %(self.owner_contract, self.period_start, self.period_end, self.owner_contract)
 
 		if self.exclude_unpaid_invoices:
 			inv_query = """select ti.name as invoice_name, tp.property_name, tu.unit_name, tc.customer,
 											tc.name as contract_name, ti.posting_date, ti.outstanding_amount, ti.grand_total from
 											`tabSales Invoice` ti, `tabOwner Contract` td, `tabProperty` tp, `tabProperty Unit` tu,
 											`tabTenancy Contract` tc where ti.docstatus = 1 and ti.tenancy_contract = tc.name and tc.property_unit = tu.name
-											and tu.property = tp.name and td.property = tp.name and td.name = '%s' and ti.name not in
+											and tu.property = tp.name and td.property = tp.name and td.name = '%s' and ti.posting_date between '%s' and '%s'
+											and ti.name not in
 											(select lc.invoice from `tabLandlord Collection Invoices` lc, `tabLandlord Remittance` lr where lr.owner_contract = '%s'
 											and lr.name = lc.parent and lc.docstatus <> 2) and ti.outstanding_amount = 0
 											order by tc.customer, ti.posting_date;
-											""" %(self.owner_contract, self.owner_contract)
+											""" %(self.owner_contract,  self.period_start, self.period_end, self.owner_contract)
 
 		collection_invoices = frappe.db.sql(inv_query, as_dict=1)
 
