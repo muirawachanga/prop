@@ -9,12 +9,17 @@ frappe.ui.form.on('Landlord Remittance', {
   },
 
   onload: function(frm) {
-    if(!frm.doc.period_start){
+    if(!frm.doc.period_start || !frm.doc.period_end){
       var today = new Date();
       var start_date = new Date(today.getFullYear(), today.getMonth(), 1);
       var end_date = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-      frm.set_value('period_start', start_date);
-      frm.set_value('period_end', end_date);
+      //Set only if not set
+      if(!frm.doc.period_start){
+        frm.set_value('period_start', start_date);
+      }
+      if(!frm.doc.period_end){
+        frm.set_value('period_end', end_date);
+      }
     }
   },
 
