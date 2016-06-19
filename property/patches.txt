@@ -1,2 +1,3 @@
 property.property_management.patches.1_0.patch_landlord_rem
 property.property_management.patches.1_1.patch_landlord_rem_periods
+property.property_management.patches.1_2.fix_landlord_rem_series
