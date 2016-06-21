@@ -28,7 +28,7 @@ frappe.ui.form.on('Tenancy Contract', {
 			return
 		}
 		if (!frm.doc.termination_date && frm.doc.contract_status == "Terminated"){
-			frm.set_value('terminated_date', get_today());
+			frm.set_value('termination_date', get_today());
 			validated = true;
 		}
 		if (!frm.doc.cancellation_date && frm.doc.contract_status == "Cancelled"){
