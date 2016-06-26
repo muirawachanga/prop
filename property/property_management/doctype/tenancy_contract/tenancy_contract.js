@@ -12,7 +12,9 @@ frappe.ui.form.on('Tenancy Contract', {
 
 		if(frm.doc.contract_status != "New"){
         frm.toggle_enable('*',0);
-        frm.toggle_enable(['items','grace_period','auto_generate_invoice', 'email_invoice', 'taxes_and_charges', 'taxes'],1);
+        if( frm.doc.contract_status != 'Terminated'){
+          frm.toggle_enable(['items','grace_period','auto_generate_invoice', 'email_invoice', 'taxes_and_charges', 'taxes', 'termination_date'],1);
+        }
 				//frm.disable_save();
 		}
 	},
@@ -28,8 +30,9 @@ frappe.ui.form.on('Tenancy Contract', {
 			return
 		}
 		if (!frm.doc.termination_date && frm.doc.contract_status == "Terminated"){
-			frm.set_value('termination_date', get_today());
-			validated = true;
+      msgprint(__("Please set the contract termination date."));
+			validated = false;
+      return;
 		}
 		if (!frm.doc.cancellation_date && frm.doc.contract_status == "Cancelled"){
 			frm.set_value('cancellation_date', get_today());
