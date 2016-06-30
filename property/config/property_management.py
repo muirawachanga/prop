@@ -95,7 +95,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Property Management Settings"),
+			"label": _("Settings"),
 			"icon": "icon-table",
 			"items": [
 				{
