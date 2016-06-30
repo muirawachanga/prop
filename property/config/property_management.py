@@ -95,6 +95,17 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Property Management Settings"),
+			"icon": "icon-table",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Property Management Settings",
+					"description": _("Property management module configuration settings.")
+				}
+			]
+		},
+		{
 			"label": _("Help"),
 			"icon": "icon-facetime-video",
 			"items": [

@@ -9,6 +9,9 @@ from frappe.utils import today, flt
 from frappe.model.mapper import get_mapped_doc, _
 
 class TenancyContract(Document):
+	def __init__(self, arg1, arg2=None):
+		super(TenancyContract, self).__init__(arg1, arg2)
+		self.lock_items = frappe.db.get_single_value('Property Management Settings', 'lock_tenancy_contract_items')
 
 	def validate(self):
 		pass
