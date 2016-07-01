@@ -9,16 +9,22 @@ frappe.ui.form.on('Landlord Remittance', {
   },
 
   onload: function(frm) {
-    if(!frm.doc.period_start || !frm.doc.period_end){
+    if(!frm.doc.collection_period_start || !frm.doc.collection_period_end){
       var today = new Date();
       var start_date = new Date(today.getFullYear(), today.getMonth(), 1);
       var end_date = new Date(today.getFullYear(), today.getMonth() + 1, 0);
       //Set only if not set
-      if(!frm.doc.period_start){
-        frm.set_value('period_start', start_date);
+      if(!frm.doc.collection_period_start){
+        frm.set_value('collection_period_start', start_date);
       }
-      if(!frm.doc.period_end){
-        frm.set_value('period_end', end_date);
+      if(!frm.doc.collection_period_end){
+        frm.set_value('collection_period_end', end_date);
+      }
+      if(!frm.doc.expense_period_start){
+        frm.set_value('expense_period_start', start_date);
+      }
+      if(!frm.doc.expense_period_end){
+        frm.set_value('expense_period_end', end_date);
       }
     }
   },
@@ -28,7 +34,14 @@ frappe.ui.form.on('Landlord Remittance', {
   },
 
 	owner_contract: function(frm) {
-    frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
+    return frappe.call({
+      method: "init_values",
+      doc: frm.doc,
+      callback: function(r, rt) {
+        frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
+        frm.refresh()
+      }
+    });
 	},
 
   include_unpaid_invoices: function(frm) {
