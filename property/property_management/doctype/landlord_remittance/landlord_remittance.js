@@ -164,6 +164,7 @@ cur_frm.cscript.recalculate_expenses = function(frm){
   // Net Amount To Landlord
   var net = flt(frm.doc.remittable_collections) - (flt(frm.doc.management_fee) + flt(frm.doc.deductible_expenses));
   cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Net Amount To Landlord").amount = net;
+  frm.doc.remittance_amount = net;
 
   frm.refresh_fields();
 
