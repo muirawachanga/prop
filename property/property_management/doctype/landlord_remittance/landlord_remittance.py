@@ -160,18 +160,18 @@ class LandlordRemittance(Document):
 			base_amount = flt(base_amount) + flt(r.item_total)
 
 		self.load_commission_rate()
-		commission_amount = flt(base_amount) * (flt(self.commission_rate) / flt(100))
-		self.management_fee = commission_amount
-		self.remittance_amount = flt(self.remittable_collections) - (flt(commission_amount) + flt(self.deductible_expenses))
+		self.management_fee = flt(base_amount) * (flt(self.commission_rate) / flt(100))
+
+		self.remittance_amount = flt(self.remittable_collections) - (flt(self.management_fee) + flt(self.deductible_expenses))
 
 		self.load_remittance_summary('Total Collections', self.total_collections)
 		self.load_remittance_summary('Remittable Collections', self.remittable_collections)
 		self.load_remittance_summary('Commission Exempted Collections', flt(self.remittable_collections) - flt(base_amount))
 		self.load_remittance_summary('Commission Eligible Collections', base_amount)
-		self.load_remittance_summary('Commission Charged', commission_amount)
+		self.load_remittance_summary('Commission Charged', self.management_fee)
 		self.load_remittance_summary('Total Expenses', self.total_expenses)
 		self.load_remittance_summary('Deductible Expenses', self.deductible_expenses)
-		self.load_remittance_summary('Net Amount To Landlord', self.remittable_collections - (flt(commission_amount) + flt(self.deductible_expenses)))
+		self.load_remittance_summary('Net Amount To Landlord', self.remittable_collections - (flt(self.management_fee) + flt(self.deductible_expenses)))
 
 	def reset_fields(self):
 		self.set('collection_invoices', [])

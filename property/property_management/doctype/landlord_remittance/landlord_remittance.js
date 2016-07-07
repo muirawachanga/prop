@@ -71,7 +71,7 @@ frappe.ui.form.on('Landlord Remittance', {
   },
   expense_period_end: function(frm){
     frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
-  },
+  }
 });
 
 cur_frm.cscript.lookup_obj = function lookup(array, prop, value) {
@@ -162,8 +162,8 @@ cur_frm.cscript.recalculate_expenses = function(frm){
 
 
   // Net Amount To Landlord
-  var net = flt(flt(frm.doc.remittable_collections) - (flt(frm.doc.commission_amount) + flt(frm.doc.deductible_expenses)));
-  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Net Amount To Landlord").amount = net
+  var net = flt(frm.doc.remittable_collections) - (flt(frm.doc.management_fee) + flt(frm.doc.deductible_expenses));
+  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Net Amount To Landlord").amount = net;
 
   frm.refresh_fields();
 
