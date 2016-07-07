@@ -49,6 +49,14 @@ frappe.ui.form.on('Landlord Remittance', {
 	},
 
   load_remittance_data: function(frm) {
+    if(frm.doc.expense_period_start > frm.doc.expense_period_end){
+      msgprint(__('Expense period start is greater than period end. Cannot load.'));
+      return;
+    }
+    if(frm.doc.collection_period_start > frm.doc.collection_period_end){
+      msgprint(__('Collections period start is greater than period end. Cannot load.'));
+      return;
+    }
     return frappe.call({
       method: "get_details",
       doc: frm.doc,
@@ -57,6 +65,12 @@ frappe.ui.form.on('Landlord Remittance', {
         frm.refresh()
       }
     });
+  },
+  expense_period_start: function(frm){
+    frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
+  },
+  expense_period_end: function(frm){
+    frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
   },
 });
 

@@ -173,12 +173,36 @@ class LandlordRemittance(Document):
 		self.load_remittance_summary('Deductible Expenses', self.deductible_expenses)
 		self.load_remittance_summary('Net Amount To Landlord', self.remittable_collections - (flt(commission_amount) + flt(self.deductible_expenses)))
 
+	def reset_fields(self):
+		self.set('collection_invoices', [])
+		self.set('collections_details', [])
+		self.set("total_collections", flt(0))
+		self.set("remittable_collections", flt(0))
 
+		self.set('expense_invoices', [])
+		self.set('expense_details', [])
+		self.set("total_expenses", flt(0))
+		self.set("deductible_expenses", flt(0))
+
+		self.management_fee = 0
+		self.remittance_amount = flt(0)
+
+		self.load_remittance_summary('Total Collections', flt(0))
+		self.load_remittance_summary('Remittable Collections', flt(0))
+		self.load_remittance_summary('Commission Exempted Collections', flt(0))
+		self.load_remittance_summary('Commission Eligible Collections', flt(0))
+		self.load_remittance_summary('Commission Charged', flt(0))
+		self.load_remittance_summary('Total Expenses', flt(0))
+		self.load_remittance_summary('Deductible Expenses', flt(0))
+		self.load_remittance_summary('Net Amount To Landlord', flt(0))
 
 	def get_details(self):
 		if not (self.owner_contract):
 			msgprint(_("Owner Contract is mandatory and should be selected."))
 			return
+
+		self.reset_fields()
+
 		#Get all invoices that have been generated but not already been remitted
 		inv_query = """select ti.name as invoice_name, tp.property_name, tu.unit_name, tc.customer,
 											tc.name as contract_name, ti.posting_date, ti.outstanding_amount, ti.grand_total from
@@ -205,12 +229,6 @@ class LandlordRemittance(Document):
 
 		collection_invoices = frappe.db.sql(inv_query, as_dict=1)
 
-		if not len(collection_invoices):
-			msgprint(_("There are no invoices pending remittance for the selected contract."))
-			return
-
-		self.get_collections(collection_invoices)
-
 		expense_invoices = frappe.db.sql("""select ti.name as invoice_name, ti.posting_date, ti.grand_total, ti.supplier_name from
 											`tabPurchase Invoice` ti, `tabOwner Contract` td, `tabProperty` tp where ti.owner_contract = td.name and
 											td.property = tp.name and td.name = '%s' and ti.posting_date between '%s' and '%s' and ti.name not in
@@ -218,6 +236,13 @@ class LandlordRemittance(Document):
 											where lr.owner_contract = '%s' and lr.name = lei.parent and lei.docstatus <> 2)
 											order by ti.posting_date;;
 											""" %(self.owner_contract, self.expense_period_start, self.expense_period_end, self.owner_contract), as_dict=1)
+
+		if not len(collection_invoices) and not len(expense_invoices):
+			msgprint(_("There are no collections or expenses pending remittance for the selected contract."))
+			return
+
+		if len(collection_invoices):
+			self.get_collections(collection_invoices)
 
 		if len(expense_invoices):
 			self.get_expenses(expense_invoices)
