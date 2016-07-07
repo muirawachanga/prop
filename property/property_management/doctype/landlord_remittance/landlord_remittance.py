@@ -212,7 +212,7 @@ class LandlordRemittance(Document):
 											and ti.name not in
 											(select lc.invoice from `tabLandlord Collection Invoices` lc, `tabLandlord Remittance` lr where lr.owner_contract = '%s'
 											and lr.name = lc.parent and lc.docstatus <> 2)
-											order by ti.posting_date;
+											order by tc.customer, ti.posting_date;
 											""" %(self.owner_contract, self.collection_period_start, self.collection_period_end, self.owner_contract)
 
 		if self.exclude_unpaid_invoices:
@@ -224,7 +224,7 @@ class LandlordRemittance(Document):
 											and ti.name not in
 											(select lc.invoice from `tabLandlord Collection Invoices` lc, `tabLandlord Remittance` lr where lr.owner_contract = '%s'
 											and lr.name = lc.parent and lc.docstatus <> 2) and ti.outstanding_amount = 0
-											order by ti.posting_date;
+											order by tc.customer, ti.posting_date;
 											""" %(self.owner_contract,  self.collection_period_start, self.collection_period_end, self.owner_contract)
 
 		collection_invoices = frappe.db.sql(inv_query, as_dict=1)
@@ -234,7 +234,7 @@ class LandlordRemittance(Document):
 											td.property = tp.name and td.name = '%s' and ti.posting_date between '%s' and '%s' and ti.name not in
 											(select lei.invoice from `tabLandlord Expense Invoices` lei, `tabLandlord Remittance` lr
 											where lr.owner_contract = '%s' and lr.name = lei.parent and lei.docstatus <> 2)
-											order by ti.posting_date;;
+											order by ti.supplier_name, ti.posting_date;
 											""" %(self.owner_contract, self.expense_period_start, self.expense_period_end, self.owner_contract), as_dict=1)
 
 		if not len(collection_invoices) and not len(expense_invoices):
