@@ -82,7 +82,6 @@ cur_frm.cscript.lookup_obj = function lookup(array, prop, value) {
 cur_frm.cscript.recalculate_collections = function(frm){
   var ci = frm.doc.collection_invoices;
   var cd = frm.doc.collections_details; //Invoice item
-  //console.log(frm);
   //Remove all the items whose invoice has been removed.
   frm.fields_dict["collections_details"].df.read_only = 0;
   frm.refresh_field("collections_details");
@@ -135,12 +134,46 @@ cur_frm.cscript.recalculate_collections = function(frm){
 
 }
 
-frappe.ui.form.on('Landlord Expense Invoices', 'expense_invoices_remove', function(frm){
+cur_frm.cscript.recalculate_expenses = function(frm){
+  var ei = frm.doc.expense_invoices;
+  var ed = frm.doc.expense_details; //Invoice item
+  //Remove all the items whose invoice has been removed.
+  frm.fields_dict["expense_details"].df.read_only = 0;
+  frm.refresh_field("expense_details");
+  $.each(ed, function(i, obj){
+    var inv = cur_frm.cscript.lookup_obj(ei, 'invoice', obj.invoice);
+    if(!inv){
+      frm.fields_dict["expense_details"].grid.grid_rows_by_docname[obj.name].remove();
+    }
+  });
+  frm.fields_dict["expense_details"].df.read_only = 1;
+  frm.refresh_field("expense_details");
+  // Total Expenses and Deductible Expenses
+  var te = flt(0);
+  var de = flt(0);
+  $.each(ei, function(i, obj){
+    te = flt(te + flt(obj.grand_total));
+    de = flt(de + flt(obj.deduction_amount));
+  });
+  frm.doc.deductible_expenses = de;
+  frm.doc.total_expenses = te
+  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Total Expenses").amount = te;
+  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Deductible Expenses").amount = de;
 
+
+  // Net Amount To Landlord
+  var net = flt(flt(frm.doc.remittable_collections) - (flt(frm.doc.commission_amount) + flt(frm.doc.deductible_expenses)));
+  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Net Amount To Landlord").amount = net
+
+  frm.refresh_fields();
+
+}
+
+
+frappe.ui.form.on('Landlord Expense Invoices', 'expense_invoices_remove', function(frm){
+  cur_frm.cscript.recalculate_expenses(frm);
 });
 
 frappe.ui.form.on('Landlord Collection Invoices', 'collection_invoices_remove', function(frm){
-  console.log(frm);
-  //console.log(frm.doc.commission_rate);
   cur_frm.cscript.recalculate_collections(frm);
 });
