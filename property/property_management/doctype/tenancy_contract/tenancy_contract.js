@@ -36,9 +36,11 @@ frappe.ui.form.on('Tenancy Contract', {
             //frm.disable_save();
         }
         //Load current tc item names to validate if user will change them.
-        $.each(frm.doc.items, function(i, o) {
-            loaded_tc_items.push(o.name);
-        });
+        if(frm.doc.items){
+          $.each(frm.doc.items, function(i, o) {
+              loaded_tc_items.push(o.name);
+          });
+        }
     },
     validate: function(frm) {
         if (!frm.doc.start_date && frm.doc.contract_status == "Active") {
