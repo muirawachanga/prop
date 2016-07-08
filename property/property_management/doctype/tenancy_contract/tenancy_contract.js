@@ -36,10 +36,10 @@ frappe.ui.form.on('Tenancy Contract', {
             //frm.disable_save();
         }
         //Load current tc item names to validate if user will change them.
-        if(frm.doc.items){
-          $.each(frm.doc.items, function(i, o) {
-              loaded_tc_items.push(o.name);
-          });
+        if (frm.doc.items) {
+            $.each(frm.doc.items, function(i, o) {
+                loaded_tc_items.push(o.name);
+            });
         }
     },
     validate: function(frm) {
@@ -64,22 +64,22 @@ frappe.ui.form.on('Tenancy Contract', {
         }
 
         if (frm.doc.contract_status != "New") {
-          if (lock_tc_items) {
-            var items = frm.doc.items;
-            for (var i = 0; i < items.length; i++) {
-                if ($.inArray(items[i].name, loaded_tc_items) == -1) {
-                    msgprint(__("You cannot add a new billing item to a contract in Active status. Not Saved."));
+            if (lock_tc_items) {
+                var items = frm.doc.items;
+                for (var i = 0; i < items.length; i++) {
+                    if ($.inArray(items[i].name, loaded_tc_items) == -1) {
+                        msgprint(__("You cannot add a new billing item to a contract in Active status. Not Saved."));
+                        validated = false;
+                        return;
+                    }
+                }
+                if (items.length != loaded_tc_items.length) {
+                    msgprint(__("You cannot remove billing items from a contract in Active status. Not Saved."));
                     validated = false;
                     return;
                 }
             }
-            if (items.length != loaded_tc_items.length) {
-                msgprint(__("You cannot remove billing items from a contract in Active status. Not Saved."));
-                validated = false;
-                return;
-            }
-          }
-          validated = true;
+            validated = true;
         }
 
     },
@@ -123,13 +123,13 @@ frappe.ui.form.on('Tenancy Contract', {
         if (!frm.doc.property_unit) {
             frm.set_value("property_name", "");
             frm.set_value("property_unit_name", "");
-        }else{
-          frappe.model.get_value("Property Unit", frm.doc.property_unit, "property", function(value) {
-              frappe.model.with_doc("Property", value.property, function(r) {
-                  var p = frappe.model.get_doc("Property", value.property);
-                  frm.set_value("property_name", p.property_name);
-              });
-          });
+        } else {
+            frappe.model.get_value("Property Unit", frm.doc.property_unit, "property", function(value) {
+                frappe.model.with_doc("Property", value.property, function(r) {
+                    var p = frappe.model.get_doc("Property", value.property);
+                    frm.set_value("property_name", p.property_name);
+                });
+            });
         }
     }
 });
