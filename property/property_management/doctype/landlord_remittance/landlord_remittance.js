@@ -39,6 +39,8 @@ frappe.ui.form.on('Landlord Remittance', {
       doc: frm.doc,
       callback: function(r, rt) {
         frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
+
+        console.log(frm);
         frm.refresh()
       }
     });
@@ -79,87 +81,67 @@ cur_frm.cscript.lookup_obj = function lookup(array, prop, value) {
         if (array[i] && array[i][prop] === value) return array[i];
 }
 
-cur_frm.cscript.recalculate_collections = function(frm){
+cur_frm.cscript.recalculate_collections = function(frm, cdt, cdn){
   var ci = frm.doc.collection_invoices;
   var cd = frm.doc.collections_details; //Invoice item
+  var lci_doc = frm.fields_dict["collection_invoices"].grid.grid_rows_by_docname[cdn].doc;
+  var cel = cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Commission Eligible Collections");
   //Remove all the items whose invoice has been removed.
   frm.fields_dict["collections_details"].df.read_only = 0;
   frm.refresh_field("collections_details");
   $.each(cd, function(i, obj){
-    var inv = cur_frm.cscript.lookup_obj(ci, 'invoice', obj.invoice);
-    if(!inv){
+    if(obj.invoice === lci_doc.invoice){
+      //Remove this inv item from the total commision eligible. (base amt)
+      if (obj.is_remittable && !obj.remit_full_amount){
+        cel.amount = flt(cel.amount) - flt(obj.item_total);
+      }
       frm.fields_dict["collections_details"].grid.grid_rows_by_docname[obj.name].remove();
     }
   });
   frm.fields_dict["collections_details"].df.read_only = 1;
   frm.refresh_field("collections_details");
-  // Total Collection and Remittable collections
-  var tc = flt(0);
-  var rc = flt(0);
-  $.each(ci, function(i, obj){
-    tc = flt(tc + flt(obj.grand_total));
-    rc = flt(rc + flt(obj.remittance_amount));
-  });
-  frm.doc.remittable_collections = rc;
-  frm.doc.total_collections = tc;
-  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Total Collections").amount = tc;
-  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Remittable Collections").amount = rc;
+  frm.doc.remittable_collections = flt(frm.doc.remittable_collections) - flt(lci_doc.remittance_amount);
+  frm.doc.total_collections = flt(frm.doc.total_collections) - flt(lci_doc.grand_total);
+  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Total Collections").amount = frm.doc.total_collections;
+  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Remittable Collections").amount = frm.doc.remittable_collections;
 
-
-  // Commission exempt and commission eligible collections_details
-  var cex = flt(0);
-  var cel = flt(0);
-  var base_amt = flt(0);
-
-  $.each(frm.doc.collections_details, function(i, obj){
-    if (!obj.is_remittable) return;
-    if (obj.remit_full_amount) return;
-    base_amt = flt(base_amt + flt(obj.item_total));
-  });
-  cel = base_amt;
-  cex = flt(rc - base_amt);
-  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Commission Exempted Collections").amount = cex;
-  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Commission Eligible Collections").amount = cel;
+  var base_amt = flt(cel.amount);
+  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Commission Exempted Collections").amount = flt(frm.doc.remittable_collections) - base_amt;
 
   // Calculate commission and remmitance
   var cr = flt(frm.doc.commission_rate/100);
   var ca = flt(base_amt * cr);
   frm.doc.management_fee = ca;
-  var net_rem = flt(rc - flt(ca + frm.doc.deductible_expenses));
+  var net_rem = flt(frm.doc.remittable_collections - flt(frm.doc.management_fee + frm.doc.deductible_expenses));
   frm.doc.remittance_amount = net_rem;
-  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Commission Charged").amount = ca;
+  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Commission Charged").amount = frm.doc.management_fee;
   cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Net Amount To Landlord").amount = net_rem;
 
   frm.refresh_fields();
 
 }
 
-cur_frm.cscript.recalculate_expenses = function(frm){
+cur_frm.cscript.recalculate_expenses = function(frm, cdt, cdn){
   var ei = frm.doc.expense_invoices;
   var ed = frm.doc.expense_details; //Invoice item
+  var lei_doc = frm.fields_dict["expense_invoices"].grid.grid_rows_by_docname[cdn].doc;
   //Remove all the items whose invoice has been removed.
   frm.fields_dict["expense_details"].df.read_only = 0;
   frm.refresh_field("expense_details");
   $.each(ed, function(i, obj){
-    var inv = cur_frm.cscript.lookup_obj(ei, 'invoice', obj.invoice);
-    if(!inv){
+    if(obj.invoice === lei_doc.invoice){
       frm.fields_dict["expense_details"].grid.grid_rows_by_docname[obj.name].remove();
     }
   });
   frm.fields_dict["expense_details"].df.read_only = 1;
   frm.refresh_field("expense_details");
-  // Total Expenses and Deductible Expenses
-  var te = flt(0);
-  var de = flt(0);
-  $.each(ei, function(i, obj){
-    te = flt(te + flt(obj.grand_total));
-    de = flt(de + flt(obj.deduction_amount));
-  });
-  frm.doc.deductible_expenses = de;
-  frm.doc.total_expenses = te
-  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Total Expenses").amount = te;
-  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Deductible Expenses").amount = de;
 
+  // Reduce Total Expenses and Deductible Expenses
+  frm.doc.total_expenses = flt(frm.doc.total_expenses) - flt(lei_doc.grand_total);
+  frm.doc.deductible_expenses = flt(frm.doc.deductible_expenses) - flt(lei_doc.deduction_amount);
+
+  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Total Expenses").amount = frm.doc.total_expenses;
+  cur_frm.cscript.lookup_obj(frm.doc.remittance_summary, "description", "Deductible Expenses").amount = frm.doc.deductible_expenses;
 
   // Net Amount To Landlord
   var net = flt(frm.doc.remittable_collections) - (flt(frm.doc.management_fee) + flt(frm.doc.deductible_expenses));
@@ -171,10 +153,10 @@ cur_frm.cscript.recalculate_expenses = function(frm){
 }
 
 
-frappe.ui.form.on('Landlord Expense Invoices', 'expense_invoices_remove', function(frm){
-  cur_frm.cscript.recalculate_expenses(frm);
+frappe.ui.form.on('Landlord Expense Invoices', 'expense_invoices_remove', function(frm, cdt, cdn){
+  cur_frm.cscript.recalculate_expenses(frm, cdt, cdn);
 });
 
-frappe.ui.form.on('Landlord Collection Invoices', 'collection_invoices_remove', function(frm){
-  cur_frm.cscript.recalculate_collections(frm);
+frappe.ui.form.on('Landlord Collection Invoices', 'collection_invoices_remove', function(frm, cdt, cdn){
+  cur_frm.cscript.recalculate_collections(frm, cdt, cdn);
 });
