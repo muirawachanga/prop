@@ -123,13 +123,14 @@ frappe.ui.form.on('Tenancy Contract', {
         if (!frm.doc.property_unit) {
             frm.set_value("property_name", "");
             frm.set_value("property_unit_name", "");
+        }else{
+          frappe.model.get_value("Property Unit", frm.doc.property_unit, "property", function(value) {
+              frappe.model.with_doc("Property", value.property, function(r) {
+                  var p = frappe.model.get_doc("Property", value.property);
+                  frm.set_value("property_name", p.property_name);
+              });
+          });
         }
-        frappe.model.get_value("Property Unit", frm.doc.property_unit, "property", function(value) {
-            frappe.model.with_doc("Property", value.property, function(r) {
-                var p = frappe.model.get_doc("Property", value.property);
-                frm.set_value("property_name", p.property_name);
-            });
-        });
     }
 });
 
