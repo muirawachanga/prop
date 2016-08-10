@@ -85,7 +85,10 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			}
 		},
 		"Tenancy Contract Item": {
-			"doctype": "Sales Invoice Item"
+			"doctype": "Sales Invoice Item",
+			"field_map": {
+				"remmitable": "remittable",
+			},
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

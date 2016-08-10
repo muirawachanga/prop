@@ -48,14 +48,6 @@ class LandlordRemittance(Document):
 		self.set("total_occupied", str(active[0][0]))
 		self.set("total_vacant", str(all[0][0] - active[0][0]))
 
-	def get_remit_flags(self,item, tc):
-		tc_item = frappe.db.sql("""select * from `tabTenancy Contract Item` tci where item_code = '%s' and parent = '%s';
-								""" %(item.item_code, tc), as_dict=1)
-		if not len(tc_item):
-			#This item is not in the Tenancy Contract. No remitting.
-			return (False, False)
-
-		return (True if tc_item[0].remmitable else False, True if tc_item[0].remit_full_amount else False,)
 
 	def get_collections(self, invoices):
 		self.set('collection_invoices', [])
@@ -82,15 +74,11 @@ class LandlordRemittance(Document):
 				nl.item_desc = it.description
 				nl.invoice_date = inv.posting_date
 				nl.item_total = it.amount
-				nl.is_remittable = 1
-				nl.remit_full_amount = 0
-				r_flags = self.get_remit_flags(it, inv.contract_name)
-				if not r_flags[0]:
+				nl.is_remittable = it.remmitable
+				nl.is_remittable = it.remit_full_amount
+				if not nl.is_remittable:
 					#Remove this amount from the invoice total to remit
 					ci.remittance_amount = ci.remittance_amount - it.amount
-					nl.is_remittable = 0
-				if r_flags[1]:
-					nl.remit_full_amount = 1
 
 			remittable_collections = flt(remittable_collections) + flt(ci.remittance_amount)
 			total_collections = flt(total_collections) + flt(ci.grand_total)

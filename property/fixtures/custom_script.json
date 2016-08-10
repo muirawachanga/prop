@@ -12,9 +12,18 @@
   "docstatus": 0, 
   "doctype": "Custom Script", 
   "dt": "Sales Invoice", 
-  "modified": "2016-05-01 17:51:35.305573", 
+  "modified": "2016-08-10 12:43:41.583999", 
   "name": "Sales Invoice-Client", 
-  "script": "cur_frm.add_fetch(\"tenancy_contract\", \"property_unit_name\", \"property_unit\");", 
+  "script": "cur_frm.add_fetch(\"tenancy_contract\", \"property_unit_name\", \"property_unit\");\n\nfrappe.ui.form.on('Sales Invoice', {\n    tenancy_contract: function(frm) {\n        if (frm.doc.docstatus === 0) {\n            cur_frm.add_custom_button(__('Tenancy Contract'), function() {\n                console.log(\"WAHAHAHA\");\n            }, __(\"Get items from\"));\n        }\n    }\n});", 
+  "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "Journal Entry", 
+  "modified": "2016-07-10 01:53:16.828297", 
+  "name": "Journal Entry-Client", 
+  "script": "frappe.ui.form.on(\"Journal Entry\", {\n    refresh: function(frm) {\n        //frm.fields_dict[\"reference_type\"].df.options = frm.fields_dict[\"reference_type\"].df.options + \"\\nRemittance Payment Voucher\";\n        var df = frappe.meta.get_docfield(\"Journal Entry Account\",\"reference_type\", frm.doc.name);\n        df.options = df.options + \"\\nRemittance Payment Voucher\";\n    }\n});\n\nfrappe.ui.form.on(\"Journal Entry Account\", \"reference_type\", function(frm, cdt, cdn){\n  //console.log(cdt);\n//Check Journal Entry.js for how to set query.\n});", 
   "script_type": "Client"
  }
 ]

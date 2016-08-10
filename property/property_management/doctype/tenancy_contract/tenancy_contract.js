@@ -154,3 +154,20 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
         })
     }
 };
+
+cur_frm.cscript.remit_full_amount = function(doc, cdt, cdn) {
+    if (frappe.model.get_value(cdt, cdn, "remit_full_amount")) {
+        frappe.model.set_value(cdt, cdn, "remmitable", 1);
+        var f = frappe.utils.filter_dict(cur_frm.fields_dict["items"].grid.grid_rows_by_docname[cdn].docfields, {
+            'fieldname': "remmitable"
+        })[0];
+        f.read_only = 1;
+        cur_frm.fields_dict["items"].grid.grid_rows_by_docname[cdn].fields_dict["remmitable"].refresh();
+    } else {
+        var f = frappe.utils.filter_dict(cur_frm.fields_dict["items"].grid.grid_rows_by_docname[cdn].docfields, {
+            'fieldname': "remmitable"
+        })[0];
+        f.read_only = 0;
+        cur_frm.fields_dict["items"].grid.grid_rows_by_docname[cdn].fields_dict["remmitable"].refresh();
+    }
+};
