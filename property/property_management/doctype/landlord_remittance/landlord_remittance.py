@@ -74,8 +74,9 @@ class LandlordRemittance(Document):
 				nl.item_desc = it.description
 				nl.invoice_date = inv.posting_date
 				nl.item_total = it.amount
-				nl.is_remittable = it.remmitable
-				nl.is_remittable = it.remit_full_amount
+				nl.is_remittable = it.remittable
+				print(nl.is_remittable)
+				nl.remit_full_amount = it.remit_full_amount
 				if not nl.is_remittable:
 					#Remove this amount from the invoice total to remit
 					ci.remittance_amount = ci.remittance_amount - it.amount
