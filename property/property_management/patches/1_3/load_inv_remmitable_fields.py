@@ -10,6 +10,8 @@ def execute():
     for inv in inv_list:
         s_items = frappe.get_list('Sales Invoice Item', fields=['*'], filters={"parent": inv.name})
         for si in s_items:
+            if si.item_code is None:
+                continue
             ti = frappe.get_list('Tenancy Contract Item', fields=['*'], filters={"item_code": si.item_code, "parent": inv.tenancy_contract})
             if not len(ti):
                 continue
