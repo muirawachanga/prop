@@ -80,6 +80,13 @@ fixtures = ["Custom Field", "Custom Script", "Workflow State", "Workflow Action"
 #	}
 # }
 
+doc_events = {
+    "Sales Invoice": {
+        "before_insert": "property.property_management.hooks.doc_hooks.sales_invoice_arrears",
+        "before_submit": "property.property_management.hooks.doc_hooks.sales_invoice_arrears"
+    }
+}
+
 # Scheduled Tasks
 # ---------------
 
