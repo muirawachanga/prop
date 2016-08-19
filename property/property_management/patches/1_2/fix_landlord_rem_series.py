@@ -1,10 +1,12 @@
 from __future__ import unicode_literals
+
 import frappe
 
 '''
 Wrong Landlord Remittance Series values after the change to use prefix LAR- and autonaming.
 Need to delete in Property Setter and also insert proper series value in tabSeries
 '''
+
 
 def execute():
     pref = 'LAR-'
