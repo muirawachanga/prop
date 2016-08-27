@@ -2,3 +2,4 @@ property.property_management.patches.1_0.patch_landlord_rem
 property.property_management.patches.1_1.patch_landlord_rem_periods
 property.property_management.patches.1_2.fix_landlord_rem_series
 property.property_management.patches.1_3.load_inv_remmitable_fields
+property.property_management.patches.1_3.patch_inv_arrears_msg
