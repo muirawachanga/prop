@@ -29,8 +29,19 @@ frappe.ui.form.on('Landlord Remittance', {
         }
     },
 
+    make_payment: function (frm) {
+        frappe.model.open_mapped_doc({
+            frm: frm,
+            method: "property.property_management.doctype.landlord_remittance.landlord_remittance.pay_remittance"
+        })
+    },
+
     refresh: function(frm) {
-        //frm.disable_save();
+        if (frm.doc.payment_status == 'Pending' && frm.doc.docstatus == 1) {
+            frm.add_custom_button(__("Make Payment"), function () {
+                frm.events.make_payment(frm);
+            }).addClass("btn-primary");
+        }
     },
 
     owner_contract: function(frm) {
@@ -39,8 +50,6 @@ frappe.ui.form.on('Landlord Remittance', {
             doc: frm.doc,
             callback: function(r, rt) {
                 frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
-
-                console.log(frm);
                 frm.refresh()
             }
         });

@@ -24,7 +24,7 @@ frappe.ui.form.on('Tenancy Contract', {
     refresh: function(frm) {
         if (frm.doc.contract_status == 'Active' || frm.doc.contract_status == 'Suspended') {
             frm.add_custom_button(__("Create Invoice"), function() {
-                frm.events.make_invoice(frm)
+                frm.events.make_invoice(frm);
             }).addClass("btn-primary");
         }
 
@@ -88,7 +88,7 @@ frappe.ui.form.on('Tenancy Contract', {
         frappe.model.open_mapped_doc({
             method: "property.property_management.doctype.tenancy_contract.tenancy_contract.make_sales_invoice",
             frm: frm
-        })
+        });
     },
     start_date: function(frm) {
         if (frm.doc.start_date) {

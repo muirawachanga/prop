@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
 
@@ -225,7 +226,7 @@ class LandlordRemittance(Document):
 
         expense_invoices = frappe.db.sql("""select ti.name as invoice_name, ti.posting_date, ti.grand_total, ti.supplier_name from
                                             `tabPurchase Invoice` ti, `tabOwner Contract` td, `tabProperty` tp where ti.owner_contract = td.name and
-                                            td.property = tp.name and td.name = '%s' and ti.posting_date between '%s' and '%s' and ti.name not in
+                                            td.property = tp.name and td.name = '%s' and ti.posting_date between '%s' and '%s' and ti.docstatus = 1 and ti.name not in
                                             (select lei.invoice from `tabLandlord Expense Invoices` lei, `tabLandlord Remittance` lr
                                             where lr.owner_contract = '%s' and lr.name = lei.parent and lei.docstatus <> 2)
                                             order by ti.supplier_name, ti.posting_date;
@@ -243,3 +244,48 @@ class LandlordRemittance(Document):
             self.get_expenses(expense_invoices)
 
         self.calculate_commision()
+
+    def before_cancel(self):
+        rpv = frappe.get_list('Remittance Payment Voucher', filters=[["landlord_remittance", "=", self.name],
+                                                                     ["docstatus", "!=", 2]])
+        for r in rpv:
+            remittance_voucher = frappe.get_doc("Remittance Payment Voucher", r.name)
+            if remittance_voucher.docstatus == 1:
+                remittance_voucher.cancel()
+            else:
+                remittance_voucher.delete()
+
+
+'''
+    Create new remittance payment voucher and submit
+    '''
+
+
+@frappe.whitelist()
+def pay_remittance(source_name, target_doc=None, ignore_permissions=False):
+    doc = frappe.get_doc("Landlord Remittance", source_name)
+    if doc.docstatus != 1:
+        frappe.throw(_("Cannot make payment for Landlord Remittance that has not been submitted. Cannot pay."))
+    if doc.payment_status == 'Paid':
+        frappe.throw(_("This Landlord Remittance has already been paid. Cannot pay."))
+
+    def postprocess(source, target):
+        target.amount_paid = target.net_remittance_amount
+        owc = frappe.get_doc('Owner Contract', doc.owner_contract)
+        prop = frappe.get_doc("Property", owc.property)
+        target.trust_fund_account = prop.trust_fund_account
+
+    r_voucher = get_mapped_doc('Landlord Remittance', source_name, {
+        "Landlord Remittance": {
+            "doctype": "Remittance Payment Voucher",
+            "field_map": {
+                "name": "landlord_remittance",
+                "owner_name": "landlord_name",
+                "remittance_amount": "net_remittance_amount",
+                "management_fee": "management_fee",
+                "deductible_expenses": "deductible_expenses"
+            },
+        }
+    }, target_doc, postprocess)
+
+    return r_voucher
