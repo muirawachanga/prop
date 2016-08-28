@@ -52,7 +52,12 @@ def get_data():
                 {
                     "type": "doctype",
                     "name": "Landlord Remittance",
-                    "description": _("Generate work orders for works to be done in a property")
+                    "description": _("Create a Landlord Remittance based on collected invoices and expenses")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Remittance Payment Voucher",
+                    "description": _("Make remittance payment to Landlords")
                 },
             ]
         },

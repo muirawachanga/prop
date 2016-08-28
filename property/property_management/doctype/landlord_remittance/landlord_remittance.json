@@ -362,7 +362,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "default": "Pending", 
@@ -1102,9 +1102,9 @@
  "in_dialog": 0, 
  "is_submittable": 1, 
  "issingle": 0, 
- "istable": 0, 
- "max_attachments": 0, 
- "modified": "2016-07-07 07:21:32.794900", 
+ "istable": 0,
+ "max_attachments": 0,
+ "modified": "2016-08-21 15:27:39.173281", 
  "modified_by": "Administrator", 
  "module": "Property Management", 
  "name": "Landlord Remittance", 
