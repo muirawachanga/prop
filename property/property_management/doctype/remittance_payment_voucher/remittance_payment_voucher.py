@@ -111,11 +111,11 @@ class RemittancePaymentVoucher(Document):
         if self.net_remittance_amount <= 0:
             frappe.throw("Net Remittance amount is invalid. Cannot be zero or less.")
 
-        if self.management_fee <= 0:
-            frappe.throw("Management Fee amount is invalid. Cannot be zero or less.")
+        if self.management_fee < 0:
+            frappe.throw("Management Fee amount is invalid. Cannot be less than zero.")
 
-        if self.deductible_expenses <= 0:
-            frappe.throw("Deductible Expenses amount is invalid. Cannot be zero or less.")
+        if self.deductible_expenses < 0:
+            frappe.throw("Deductible Expenses amount is invalid. Cannot be less than zero.")
 
     def create_deductions_invoice(self):
         if self.get("deductible_expenses") == 0:
@@ -188,6 +188,8 @@ class RemittancePaymentVoucher(Document):
     def create_advance(self):
         journal_entry = frappe.new_doc('Journal Entry')
         journal_amt = flt(self.get("management_fee") + self.get('deductible_expenses'))
+        if journal_amt == 0:
+            return
         cr_entry = journal_entry.append("accounts", {})
         cr_entry.account = get_party_account('Customer', self.get_customer_name(), journal_entry.company)
         cr_entry.credit_in_account_currency = journal_amt
