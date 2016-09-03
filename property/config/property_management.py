@@ -109,6 +109,11 @@ def get_data():
                     "type": "doctype",
                     "name": "Property Management Settings",
                     "description": _("Property management module configuration settings.")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Billing Period",
+                    "description": _("Setup Billing Periods.")
                 }
             ]
         },
