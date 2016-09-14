@@ -96,7 +96,7 @@
   "doctype": "Workflow", 
   "document_type": "Tenancy Contract", 
   "is_active": 1, 
-  "modified": "2016-04-23 00:34:02.362912", 
+  "modified": "2016-09-09 22:16:02.686617", 
   "name": "Tenancy Contract", 
   "states": [
    {
@@ -174,10 +174,10 @@
     "state": "Active"
    }, 
    {
-    "action": "Cancel", 
+    "action": "Activate", 
     "allowed": "Property Manager", 
-    "next_state": "Cancelled", 
-    "state": "Active"
+    "next_state": "Active", 
+    "state": "Suspended"
    }
   ], 
   "workflow_name": "Tenancy Contract", 

@@ -12,18 +12,9 @@
   "docstatus": 0, 
   "doctype": "Custom Script", 
   "dt": "Sales Invoice", 
-  "modified": "2016-08-10 12:43:41.583999", 
+  "modified": "2016-09-04 06:46:58.473106", 
   "name": "Sales Invoice-Client", 
-  "script": "cur_frm.add_fetch(\"tenancy_contract\", \"property_unit_name\", \"property_unit\");\n\nfrappe.ui.form.on('Sales Invoice', {\n    tenancy_contract: function(frm) {\n        if (frm.doc.docstatus === 0) {\n            cur_frm.add_custom_button(__('Tenancy Contract'), function() {\n                console.log(\"WAHAHAHA\");\n            }, __(\"Get items from\"));\n        }\n    }\n});", 
-  "script_type": "Client"
- }, 
- {
-  "docstatus": 0, 
-  "doctype": "Custom Script", 
-  "dt": "Journal Entry", 
-  "modified": "2016-07-10 01:53:16.828297", 
-  "name": "Journal Entry-Client", 
-  "script": "frappe.ui.form.on(\"Journal Entry\", {\n    refresh: function(frm) {\n        //frm.fields_dict[\"reference_type\"].df.options = frm.fields_dict[\"reference_type\"].df.options + \"\\nRemittance Payment Voucher\";\n        var df = frappe.meta.get_docfield(\"Journal Entry Account\",\"reference_type\", frm.doc.name);\n        df.options = df.options + \"\\nRemittance Payment Voucher\";\n    }\n});\n\nfrappe.ui.form.on(\"Journal Entry Account\", \"reference_type\", function(frm, cdt, cdn){\n  //console.log(cdt);\n//Check Journal Entry.js for how to set query.\n});", 
+  "script": "cur_frm.add_fetch(\"tenancy_contract\", \"property_unit_name\", \"property_unit\");\n\nfrappe.ui.form.on('Sales Invoice', {\n    tenancy_contract: function(frm) {\n        if (frm.doc.docstatus === 0) {\n            cur_frm.add_custom_button(__('Tenancy Contract'), function() {\n            }, __(\"Get items from\"));\n        }\n        frm.events.on_tenancy_contract(frm);\n    },\n    refresh: function(frm) {\n        frm.events.on_tenancy_contract(frm);\n    },\n    on_tenancy_contract: function(frm){\n        if(frm.doc.tenancy_contract){\n            frm.toggle_reqd('billing_period', 1);\n            frm.toggle_enable('billing_period', 1);\n            frm.events.setup_period_query(frm);\n        }else{\n            frm.toggle_reqd('billing_period', 0);\n            frm.toggle_enable('billing_period', 0);\n        }\n    },\n    setup_period_query: function(frm){\n        var me = frm;\n        frappe.model.get_value(\"Tenancy Contract\", frm.doc.tenancy_contract, \"billing_period\", function(value) {\nconsole.log(value);\n            me.set_query(\"billing_period\", function() {\n                return {\n                    filters: {\n                        \"period_type\": value.billing_period\n                    }\n                }\n            });\n        });\n    }\n});", 
   "script_type": "Client"
  }
 ]

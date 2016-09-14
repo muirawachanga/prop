@@ -1,26 +1,86 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015, Bituls Company Limited and contributors
+# Copyright (c) 2016, Bituls Company Limited and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
 
 import frappe
+from frappe.exceptions import ValidationError
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc, _
-from frappe.utils import today, flt
+from frappe.utils import getdate, date_diff, flt, add_days, today
+from property.property_management import utils
 
 
 class TenancyContract(Document):
     def __init__(self, arg1, arg2=None):
         super(TenancyContract, self).__init__(arg1, arg2)
         self.lock_items = frappe.db.get_single_value('Property Management Settings', 'lock_tenancy_contract_items')
+        self.old_items_names = []
+        if self.contract_status != 'New':
+            self.old_items_names = [i.name for i in self.get("items")]
 
     def validate(self):
-        pass
+        self.validate_property_unit()
+        self.validate_items()
+        self.validate_dates()
+
+    def validate_dates(self):
+        if self.contract_status == 'Active':
+            if not self.start_date:
+                frappe.throw(
+                    _("You must set the contract start date before approving"))
+            if not self.end_date:
+                frappe.throw(
+                    _("You must set the contract end date before approving"))
+
+        if self.contract_status == 'Terminated':
+            if not self.termination_date:
+                frappe.throw(
+                    _("You must set the contract termination date before terminating"))
+
+        if self.contract_status == 'Cancelled':
+            if not self.cancellation_date:
+                frappe.throw(
+                    _("You must set the contract cancellation date before cancelling"))
+
+    def validate_property_unit(self):
+        exists = frappe.get_list(self.doctype, fields=["name"], filters=[["property_unit", "=", self.property_unit],
+                                                                         ["contract_status", "=", "Active"]])
+        if not exists:
+            return
+        if self.name == exists[0].name:
+            return
+        frappe.throw(_("An Active Tenancy Contract already exists in this property unit. Cannot create contract."))
+
+    def validate_items(self):
+        items = self.get("items")
+        if self.get("contract_status") == 'Active':
+            if not len(items):
+                frappe.async.publish_realtime(doctype=self.doctype, docname=self.name)
+                frappe.throw(
+                    _("Cannot approve a tenancy contract with no billing items"))
+
+        # Validate items by simple count first. If items were removed.
+        if self.get("contract_status") == 'Active':
+            if len(self.old_items_names) and len(items) != len(self.old_items_names) and self.lock_items:
+                frappe.throw(
+                    _("Cannot modify Items to an active contract"))
+
+        for i in items:
+            if self.get("contract_status") == 'Active':
+                # Check if items were added
+                if len(self.old_items_names) and i.name not in self.old_items_names and self.lock_items:
+                    frappe.throw(
+                        _("Cannot modify Items to an active contract"))
+            if i.is_utility_item:
+                if not i.utility_item:
+                    frappe.throw(
+                        _("Item {} is marked as Utility Item but no Utility Item is selected.").format(i.item_name))
 
 
 @frappe.whitelist()
-def get_item_details(item_code):
+def get_item_details(item_code, start_date):
     item = frappe.db.sql("""select item_name, stock_uom, image, description, item_group, brand, income_account, selling_cost_center
 		from `tabItem` where name = %s""", item_code, as_dict=1)
     return {
@@ -31,51 +91,179 @@ def get_item_details(item_code):
         'item_group': item and item[0]['item_group'] or '',
         'brand': item and item[0]['brand'] or '',
         'income_account': item and item[0]['income_account'] or '',
-        'cost_center': item and item[0]['selling_cost_center'] or ''
+        'cost_center': item and item[0]['selling_cost_center'] or '',
+        'start_date': start_date or today()
     }
 
 
-@frappe.whitelist()
-def generate_invoice(dn):
+def get_last_tc_invoice(name):
     """
-    Generate invoices for all property units based on the tenant contracts.
+    Load the last invoice of a particular tenancy contract
     """
-    contracts = frappe.db.sql("""select * from `tabTenancy Contract` where auto_generate_invoice = %(auto)s
-							 and date_of_first_billing <= %(date)s and
-							 status = %(status)s """, {"date": today(), "auto": 1, "status": "Active"}, as_dict=True)
-    print contracts
-    if not contracts:
-        print "No tenant contracts to generate invoices for."
+    doc = frappe.get_all("Sales Invoice", ["name"], [["docstatus", "!=", 2], ["is_return", "!=", 1],
+                                                     ["tenancy_contract", "=", name]],
+                         order_by="creation desc", limit_page_length=1)
+    if doc:
+        return frappe.get_doc("Sales Invoice", doc[0].name)
+    else:
+        return None
+
+
+def set_missing_values(source, target):
+    target.set('due_date', add_days(target.get('posting_date'), source.due_date_days or 0))
+    target.is_pos = 0
+    target.ignore_pricing_rule = 1
+    target.flags.ignore_permissions = True
+    target.run_method("set_missing_values")
+    target.run_method("calculate_taxes_and_totals")
+
+
+def set_period(source, target):
+    """
+    Set invoice billing period
+    :param source: Tenancy Contract doc
+    :param target: Sales Invoice doc to set billing period
+    :return: None
+    """
+    last_inv = get_last_tc_invoice(source.name)
+    if last_inv:
+        pn = utils.get_next_period(last_inv.get("billing_period"))
+        if not pn:
+            frappe.throw(_("Could not determine period for this invoice. Looking for the next period from {}")
+                         .format(last_inv.get("billing_period")))
+        target.set("billing_period", pn)
+        period = frappe.get_doc("Billing Period", target.get("billing_period"))
+        target.set("posting_date", period.get("start_date"))
         return
 
-    for c in contracts:
-        invoice = __generate_invoice(c)
-        if (c.email_invoice == 1):
-            __send_email(invoice, c)
+    # This is the first invoice. Try to determine the period to use
+    pn = utils.get_billing_period_for_date(getdate(source.get("date_of_first_billing")), source.get('billing_period'))
+    if not pn:
+        frappe.throw(_("Could not determine period for this invoice. Looking for a period covering "
+                       "the billing date: {}").format(source.get("date_of_first_billing")))
+    target.set("billing_period", pn)
+    target.set("posting_date", source.get("date_of_first_billing"))
+
+
+def remove_items(target, items):
+    curr_items = target.get("items")
+    item_codes_to_remove = [i.item_code for i in items]
+    items_to_remove = [item for item in curr_items if item.item_code in item_codes_to_remove]
+    for i in items_to_remove:
+        curr_items.remove(i)
+
+
+def validate_items(source, target):
+    tc_items = source.get('items')
+    last_inv = get_last_tc_invoice(source.name)
+    inv_items_to_remove = []
+    # Remove items that should not be included in this invoice based on their characteristics in TC items
+
+    for tc_i in tc_items:
+        # Remove non recurring based on if a prev invoice exists and start of billing for this item is due.
+        # We assume it must have already been billed
+        if last_inv:
+            if not tc_i.get('recurring'):
+                if getdate(tc_i.get('start_date')) <= last_inv.get('posting_date'):
+                    inv_items_to_remove.append(tc_i)
+        # Remove items whose start of billing is not yet due
+        if getdate(tc_i.get('start_date')) > target.get('posting_date'):
+            if tc_i not in inv_items_to_remove:
+                inv_items_to_remove.append(tc_i)
+    if inv_items_to_remove:
+        remove_items(target, inv_items_to_remove)
+
+
+def prorate(item, tc_item, period):
+    """
+    Prorates an item cost based on the period and the start_date of billing for that item.
+    :param item: Invoice item to prorate
+    :param tc_item: TC Item with the required attributes
+    :param period: The period being billed
+    :return: The same item with the adjusted rate
+    """
+    days_in_period = date_diff(period.end_date, period.start_date) + 1
+    daily_rate = flt(flt(item.rate) / flt(days_in_period))
+    days_to_bill = date_diff(period.end_date, tc_item.start_date) + 1
+    item.rate = flt(flt(daily_rate) * flt(days_to_bill))
+    item.description = "{} - Prorated {} Days".format(item.description, days_to_bill)
+    return item
+
+
+def prorate_items(source, target):
+    period = frappe.get_doc("Billing Period", target.get("billing_period"))
+
+    inv_items = target.get("items")
+    tc_items = source.get("items")
+
+    for it in inv_items:
+        tc_it = [i for i in tc_items if i.item_code == it.item_code][0]
+        if getdate(tc_it.start_date) > getdate(period.start_date):
+            prorate(it, tc_it, period)
+
+
+def bill_utility_item(ui_measurement_doc, item, source, target):
+    utility_item = ui_measurement_doc.get_utility_item()
+    usage = 1.0  # Default for monetary items
+    if utility_item.measurement_type == 'Meter Reading':
+        prev_measurement = ui_measurement_doc.get_previous_measurement()
+        usage = ui_measurement_doc.meter_reading - prev_measurement.meter_reading
+    if utility_item.measurement_type == 'Usage Units':
+        usage = ui_measurement_doc.usage_units
+
+    inv_item = [i for i in target.get('items') if i.item_code == item.item_code][0]
+    inv_item.set('qty', int(usage))
+    if utility_item.measurement_type == 'Monetary Amount':
+        inv_item.set('rate', ui_measurement_doc.monetary_amount)
+    ui_measurement_doc.set('usage_units', inv_item.get('qty'))
+
+
+def process_utility_items(source, target):
+    u_items = [i for i in source.get('items') if i.is_utility_item]
+
+    """We hold all the uim items that we bill here. We update them later after saving this invoice."""
+    target.utility_items_measurements = []
+
+    for item in u_items:
+        utility_item = frappe.get_doc('Utility Item', item.utility_item)
+        ui_measurement = frappe.get_list('Utility Item Measurement', fields=['*'], filters=[
+            ['tenancy_contract', '=', source.name], ['utility_item', '=', utility_item.name],
+            ['measurement_status', '=', 'New'], ['is_opening_entry', '=', 0]
+        ])
+        if not ui_measurement:
+            msg = _("This Tenancy Contract's item '{}' contains a Utility Item '{}' that should be billed with "
+                    "this invoice but no measurement / reading exists for it in the invoice period. "
+                    "Please enter the Utility Item Measurement for the current period. "
+                    "Cannot generate invoice.").format(item.item_name, item.utility_item)
+            frappe.throw(msg, utils.MissingUtilityItemException(msg))
+        if len(ui_measurement) > 1:
+            msg = _("Invalid Utility Item Measurements for item '{}', Utility Item '{}'. Found more than "
+                    "one measurement pending billing. "
+                    "Cannot generate invoice.").format(item.item_name, item.utility_item)
+            frappe.throw(msg, ValidationError(msg))
+
+        ui_measurement_doc = frappe.get_doc('Utility Item Measurement', ui_measurement[0].name)
+        bill_utility_item(ui_measurement_doc, item, source, target)
+        target.utility_items_measurements.append(ui_measurement_doc)
 
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
-    verify_items(source_name)
+    tc_doc = frappe.get_doc("Tenancy Contract", source_name)
+    verify_items(tc_doc)
+    if getdate(tc_doc.date_of_first_billing) > getdate():
+        frappe.throw(_('Cannot create invoice for this contract. Date of First Billing is greater than today.'))
 
     def postprocess(source, target):
+        set_period(source, target)
+        validate_items(source, target)
+        process_utility_items(source, target)
+        prorate_items(source, target)
         set_missing_values(source, target)
         # Get the advance paid Journal Entries in Sales Invoice Advance
         target.get_advances()
 
-    def set_missing_values(source, target):
-        target.is_pos = 0
-        target.ignore_pricing_rule = 1
-        target.flags.ignore_permissions = True
-        target.run_method("set_missing_values")
-        target.run_method("calculate_taxes_and_totals")
-
-    def update_item(source, target, source_parent):
-        target.amount = flt(source.qty) * flt(source.rate)
-        target.base_aunt = target.amount
-        target.qty = source.qty
-
-    doclist = get_mapped_doc("Tenancy Contract", source_name, {
+    invoice = get_mapped_doc("Tenancy Contract", source_name, {
         "Tenancy Contract": {
             "doctype": "Sales Invoice",
             "field_map": {
@@ -97,11 +285,15 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
             "add_if_empty": True
         }
     }, target_doc, postprocess, ignore_permissions=ignore_permissions)
+    invoice.save()
+    # Link the Utility Item Measurements billed in this invoice.
+    for uim in invoice.utility_items_measurements:
+        uim.set_billed(invoice)
+        uim.save()
+    invoice.submit()
+    return invoice
 
-    return doclist
 
-
-def verify_items(name):
-    tc = frappe.get_doc("Tenancy Contract", name)
-    if not len(tc.items):
-        frappe.msgprint(_('No Contract Items to invoice for this contract.'), raise_exception=1)
+def verify_items(tc_doc):
+    if not len(tc_doc.items):
+        frappe.throw(_('No Contract Items to invoice for this contract.'))

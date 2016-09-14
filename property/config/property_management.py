@@ -59,6 +59,12 @@ def get_data():
                     "name": "Remittance Payment Voucher",
                     "description": _("Make remittance payment to Landlords")
                 },
+                {
+                    "type": "doctype",
+                    "name": "Utility Item Measurement",
+                    "description": _(
+                        "Record and Track measurements (Meter Readings / Units / Monetary Amounts). Enter those here.")
+                },
             ]
         },
         {
@@ -84,6 +90,13 @@ def get_data():
                     "type": "doctype",
                     "name": "Item",
                     "description": _("Create and manage rental invoice items.")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Utility Item",
+                    "description": _(
+                        "Create and manage Utility Items to be used for utility services billing e.g. water"
+                        ", electricity etc.")
                 },
             ]
         },

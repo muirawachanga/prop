@@ -1,44 +1,64 @@
 // Copyright (c) 2016, Bituls Company Limited and contributors
 // For license information, please see license.txt
 
-var lock_tc_items = 1;
+
+cur_frm.add_fetch()
+var lock_tc_items = 0;
 var loaded_tc_items = [];
 
 frappe.ui.form.on('Tenancy Contract', {
     onload: function(frm) {
-        return frappe.call({
-            method: "property.property_management.doctype.property_management_settings.property_management_settings.load_configuration",
-            args: {
-                "name": 'lock_tenancy_contract_items',
-                "default": 1
-            },
-            callback: function(r, rt) {
-                if (r) {
-                    lock_tc_items = r.message;
-                } else {
-                    msgprint(__("Failed to load required configuration! Please contact support."), __("Warning!"));
-                }
-            }
-        });
+
     },
     refresh: function(frm) {
+        if(frm.doc.__islocal){
+            frm.set_query('property_unit', function(){
+                return {
+                    query: "property.property_management.doctype.property_unit.property_unit.property_unit_query",
+                    filters: {
+                        tc_filters: ['Active', 'New'],
+                        side: 'not in'
+                    }
+                }
+            });
+        }
         if (frm.doc.contract_status == 'Active' || frm.doc.contract_status == 'Suspended') {
             frm.add_custom_button(__("Create Invoice"), function() {
                 frm.events.make_invoice(frm);
             }).addClass("btn-primary");
         }
 
-        if (frm.doc.contract_status != "New") {
+        if (frm.doc.contract_status !== "New") {
             frm.toggle_enable('*', 0);
             if (frm.doc.contract_status != 'Terminated') {
-                frm.toggle_enable(['items', 'grace_period', 'auto_generate_invoice', 'email_invoice', 'taxes_and_charges', 'taxes', 'termination_date'], 1);
+                frm.toggle_enable(['items','grace_period', 'auto_generate_invoice', 'email_invoice', 'termination_date'], 1);
             }
-            //frm.disable_save();
-        }
-        //Load current tc item names to validate if user will change them.
-        if (frm.doc.items) {
-            $.each(frm.doc.items, function(i, o) {
-                loaded_tc_items.push(o.name);
+            frappe.call({
+                method: "property.property_management.doctype.property_management_settings.property_management_settings.load_configuration",
+                args: {
+                    "name": 'lock_tenancy_contract_items',
+                    "default": 1
+                },
+                callback: function(r) {
+                    if (!r.exc){
+                        if(r.message) {
+                            lock_tc_items = r.message;
+                        }else{
+                            lock_tc_items = 0;
+                        }
+                        if(lock_tc_items) {
+                            frm.toggle_enable('items', 0);
+                            frm.events.disable_items(frm);
+                            var items_grid = frm.fields_dict["items"].grid;
+                            loaded_tc_items = items_grid.get_data();
+                        }else{
+                            frm.toggle_enable('items', 1);
+                        }
+                    } else {
+                        msgprint(__("Failed to load required configuration! Please contact support."), __("Warning!"));
+                    }
+
+                }
             });
         }
     },
@@ -64,9 +84,14 @@ frappe.ui.form.on('Tenancy Contract', {
         }
 
         if (frm.doc.contract_status != "New") {
-            if (lock_tc_items) {
-                var items = frm.doc.items;
-                for (var i = 0; i < items.length; i++) {
+            var items = frm.doc.items;
+            if(!items.length){
+                msgprint(__("You Cannot approve a tenancy contract with no billing items. Not Saved."));
+                validated = false;
+                return;
+            }
+            if (lock_tc_items /*&& loaded_tc_items.length*/) {
+                /*for (var i = 0; i < items.length; i++) {
                     if ($.inArray(items[i].name, loaded_tc_items) == -1) {
                         msgprint(__("You cannot add a new billing item to a contract in Active status. Not Saved."));
                         validated = false;
@@ -77,6 +102,22 @@ frappe.ui.form.on('Tenancy Contract', {
                     msgprint(__("You cannot remove billing items from a contract in Active status. Not Saved."));
                     validated = false;
                     return;
+                }*/
+                var items_grid = frm.fields_dict["items"].grid;
+                if(!items_grid.data_rows_are_same(loaded_tc_items)){
+                    msgprint(__("You cannot remove billing items from a contract in Active status. Not Saved."));
+                    validated = false;
+                    return;
+                }
+                for (var i = 0; i < items.length; i++) {
+                    if(items[i].is_utility_item){
+                        if(!items[i].utility_item){
+                            msgprint(__("Item: " + item[i].item_name + " is marked as Utility Item " +
+                                "but has no Utility Item choosen"));
+                            validated = false;
+                            return;
+                        }
+                    }
                 }
             }
             validated = true;
@@ -131,6 +172,16 @@ frappe.ui.form.on('Tenancy Contract', {
                 });
             });
         }
+    },
+    disable_items: function(frm){
+        var item_grid = frm.fields_dict["items"].grid;
+        var ignore_field_types = ['Column Break', 'Section Break'];
+        var ignore_fields = ['description', 'stock_uom', 'income_account', 'cost_center'];
+        $.each(item_grid.docfields, function(i, val){
+            if($.inArray(val.fieldtype, ignore_field_types) !== -1) return;
+            if($.inArray(val.fieldname, ignore_fields)  !== -1) return;
+            item_grid.toggle_enable(val.fieldname, 0);
+        })
     }
 });
 
@@ -141,7 +192,8 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
         return frappe.call({
             method: "property.property_management.doctype.tenancy_contract.tenancy_contract.get_item_details",
             args: {
-                "item_code": d.item_code
+                "item_code": d.item_code,
+                "start_date": cur_frm.doc.start_date
             },
             callback: function(r, rt) {
                 if (r.message) {
@@ -169,5 +221,24 @@ cur_frm.cscript.remit_full_amount = function(doc, cdt, cdn) {
         })[0];
         f.read_only = 0;
         cur_frm.fields_dict["items"].grid.grid_rows_by_docname[cdn].fields_dict["remmitable"].refresh();
+    }
+};
+
+cur_frm.cscript.is_utility_item = function(doc, cdt, cdn) {
+    if (frappe.model.get_value(cdt, cdn, "is_utility_item")) {
+        var f = frappe.utils.filter_dict(cur_frm.fields_dict["items"].grid.grid_rows_by_docname[cdn].docfields, {
+            'fieldname': "utility_item"
+        })[0];
+        f.read_only = 0;
+        f.reqd = 0; //Should set to 1 but that breaks because you can no longer save the form
+        cur_frm.fields_dict["items"].grid.grid_rows_by_docname[cdn].fields_dict["utility_item"].refresh();
+    } else {
+        var f = frappe.utils.filter_dict(cur_frm.fields_dict["items"].grid.grid_rows_by_docname[cdn].docfields, {
+            'fieldname': "utility_item"
+        })[0];
+        frappe.model.set_value(cdt, cdn, "utility_item", "");
+        f.read_only = 1;
+        f.reqd = 0;
+        cur_frm.fields_dict["items"].grid.grid_rows_by_docname[cdn].fields_dict["utility_item"].refresh();
     }
 };
