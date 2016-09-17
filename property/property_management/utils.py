@@ -7,18 +7,37 @@ from __future__ import unicode_literals
 from datetime import date
 
 import frappe
-from frappe.exceptions import ValidationError
+from frappe.exceptions import ValidationError, DataError
 from frappe.utils import get_first_day, get_last_day
+from frappe import _
 
 
 class MissingUtilityItemException(ValidationError):
     pass
 
 
+def create_period_if_not_exists(ref_date, type):
+    if get_billing_period_for_date(ref_date, type):
+        return
+    if type == 'Monthly':
+        create_monthly_periods(ref_date)
+        return
+    elif type == 'Quarterly':
+        create_quarterly_periods(ref_date)
+        return
+    elif type == 'Yearly':
+        create_yearly_periods(ref_date)
+        return
+
+    raise DataError(_('Unsupported Period Type: {}').format(type))
+
+
+
 @frappe.whitelist()
-def create_yearly_periods():
-    start = date(date.today().year, 1, 1)
-    end = date(date.today().year, 12, 31)
+def create_yearly_periods(ref_date=None):
+    ref_date = ref_date or date.today()
+    start = date(ref_date.year, 1, 1)
+    end = date(ref_date.year, 12, 31)
     p_name = start.strftime('Year-%Y')
     doc = frappe.get_doc({"doctype": "Billing Period", "period_name": p_name, "start_date": start, "end_date": end,
                           "period_type": "Yearly"})
@@ -26,11 +45,12 @@ def create_yearly_periods():
 
 
 @frappe.whitelist()
-def create_quarterly_periods():
+def create_quarterly_periods(ref_date=None):
+    ref_date = ref_date or date.today()
     q = 1
     for i in range(0, 12, 3):
-        start = get_first_day(date(date.today().year, 1, 1), 0, i)
-        tmp = get_first_day(date(date.today().year, 1, 1), 0, i + 2)
+        start = get_first_day(date(ref_date.year, 1, 1), 0, i)
+        tmp = get_first_day(date(ref_date.year, 1, 1), 0, i + 2)
         end = get_last_day(tmp)
         prefix = 'Q{}-'.format(q)
         q += 1
@@ -41,9 +61,10 @@ def create_quarterly_periods():
 
 
 @frappe.whitelist()
-def create_monthly_periods():
+def create_monthly_periods(ref_date=None):
+    ref_date = ref_date or date.today()
     for i in range(12):
-        start = get_first_day(date(date.today().year, 1, 1), 0, i)
+        start = get_first_day(date(ref_date.year, 1, 1), 0, i)
         end = get_last_day(start)
         p_name = start.strftime('%b-%Y')
         doc = frappe.get_doc({"doctype": "Billing Period", "period_name": p_name, "start_date": start, "end_date": end,

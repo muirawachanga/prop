@@ -4,3 +4,4 @@ property.property_management.patches.1_2.fix_landlord_rem_series
 property.property_management.patches.1_3.load_inv_remmitable_fields
 property.property_management.patches.1_3.patch_inv_arrears_msg
 property.property_management.patches.1_4.customize_journal_entry_account_form
+property.property_management.patches.1_5.add_billing_period
