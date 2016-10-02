@@ -32,7 +32,6 @@ def create_period_if_not_exists(ref_date, type):
     raise DataError(_('Unsupported Period Type: {}').format(type))
 
 
-
 @frappe.whitelist()
 def create_yearly_periods(ref_date=None):
     ref_date = ref_date or date.today()
@@ -113,3 +112,9 @@ def get_next_period(period_name, offset=1):
     if len(fetched_periods) < page_len:
         return None
     return fetched_periods[page_len - 1].name
+
+
+def disable_quick_entry(dtn):
+    doc = frappe.get_doc('DocType', dtn)
+    doc.set('quick_entry', 0)
+    return doc.db_update()

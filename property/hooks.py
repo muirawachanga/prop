@@ -48,6 +48,8 @@ app_license = "GNU"
 # before_install = "property.install.before_install"
 # after_install = "property.install.after_install"
 
+after_install = "property.install.after_install"
+
 # Desk Notifications
 # ------------------
 # See frappe.core.notifications.get_notification_config
@@ -113,7 +115,7 @@ doc_events = {
 # Testing
 # -------
 
-# before_tests = "property.install.before_tests"
+before_tests = "property.install.before_tests"
 
 # Overriding Whitelisted Methods
 # ------------------------------

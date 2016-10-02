@@ -1,14 +1,16 @@
 {
- "allow_copy": 0, 
+ "allow_copy": 1, 
  "allow_import": 0, 
  "allow_rename": 0, 
  "autoname": "naming_series:", 
+ "beta": 0, 
  "creation": "2016-03-02 19:21:16.135755", 
  "custom": 0, 
  "description": "Create and manage contracts with property owners", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Document", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -593,13 +595,14 @@
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "idx": 0, 
+ "image_view": 0, 
  "in_create": 0, 
  "in_dialog": 0, 
- "is_submittable": 1, 
+ "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-06-15 21:18:14.058127", 
+ "modified": "2016-09-22 23:44:50.720227", 
  "modified_by": "Administrator", 
  "module": "Property Management", 
  "name": "Owner Contract", 
@@ -627,9 +630,11 @@
    "write": 1
   }
  ], 
+ "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
- "title_field": "property_name"
+ "title_field": "property_name", 
+ "track_seen": 0
 }

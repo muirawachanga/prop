@@ -10,6 +10,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc, _
 from frappe.utils import getdate, date_diff, flt, add_days, today
 from property.property_management import utils
+from datetime import timedelta
 
 
 class TenancyContract(Document):
@@ -77,10 +78,15 @@ class TenancyContract(Document):
                 if not i.utility_item:
                     frappe.throw(
                         _("Item {} is marked as Utility Item but no Utility Item is selected.").format(i.item_name))
+            if self.get('start_date') and i.start_date < self.get('start_date'):
+                frappe.throw(
+                    _("Item {} billing start date is less than the contract's billing start date."
+                      "Billing start date for items should be greater or equal to the contract billing start date")
+                    .format(i.item_name))
 
 
 @frappe.whitelist()
-def get_item_details(item_code, start_date):
+def get_item_details(item_code, start_date=None):
     item = frappe.db.sql("""select item_name, stock_uom, image, description, item_group, brand, income_account, selling_cost_center
 		from `tabItem` where name = %s""", item_code, as_dict=1)
     return {
@@ -246,13 +252,18 @@ def process_utility_items(source, target):
         bill_utility_item(ui_measurement_doc, item, source, target)
         target.utility_items_measurements.append(ui_measurement_doc)
 
+def validate_dates_before_invoice_gen(tc_doc):
+    delta = timedelta(days=tc_doc.grace_period)
+    # Account for Grace Period to allow invoice generation if today is >= date_of_first_billing - grace_period (days)
+    if getdate() < getdate(tc_doc.date_of_first_billing) + delta:
+        frappe.throw(_('Cannot create invoice for this contract. Date of First Billing plus Billing Grace Period'
+                       ' is greater than today.'))
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
     tc_doc = frappe.get_doc("Tenancy Contract", source_name)
     verify_items(tc_doc)
-    if getdate(tc_doc.date_of_first_billing) > getdate():
-        frappe.throw(_('Cannot create invoice for this contract. Date of First Billing is greater than today.'))
+    validate_dates_before_invoice_gen(tc_doc)
 
     def postprocess(source, target):
         set_period(source, target)
@@ -261,7 +272,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
         prorate_items(source, target)
         set_missing_values(source, target)
         # Get the advance paid Journal Entries in Sales Invoice Advance
-        target.get_advances()
+        target.run_method('set_advances')
 
     invoice = get_mapped_doc("Tenancy Contract", source_name, {
         "Tenancy Contract": {

@@ -67,14 +67,14 @@ class RemittancePaymentVoucher(Document):
 
         lr = frappe.get_doc('Landlord Remittance', self.landlord_remittance)
         lr.set('payment_status', 'Settled')
-        lr.save()
+        lr.db_update()
         # Create advances into landlord's customer account from the trust fund account.
         # This will be used to pay the commissions and expense deduction invoices
-        self.create_advance()
+        adv_journal_entry = self.create_advance()
 
         # Create the invoices to landlord
-        self.create_management_fee_invoice()
-        self.create_deductions_invoice()
+        self.create_management_fee_invoice(adv_journal_entry)
+        self.create_deductions_invoice(adv_journal_entry)
 
     def before_cancel(self):
         mgt_fee_inv = frappe.get_list("Sales Invoice", fields="*", filters=[["remittance_reference", "=", self.name],
@@ -94,7 +94,7 @@ class RemittancePaymentVoucher(Document):
     def on_cancel(self):
         lr = frappe.get_doc('Landlord Remittance', self.landlord_remittance)
         lr.set('payment_status', 'Pending')
-        lr.save()
+        lr.db_update()
 
     def validate(self):
         lr = frappe.get_doc("Landlord Remittance", self.landlord_remittance)
@@ -117,7 +117,7 @@ class RemittancePaymentVoucher(Document):
         if self.deductible_expenses < 0:
             frappe.throw("Deductible Expenses amount is invalid. Cannot be less than zero.")
 
-    def create_deductions_invoice(self):
+    def create_deductions_invoice(self, adv_journal_entry):
         if self.get("deductible_expenses") == 0:
             return
         inv = frappe.new_doc('Sales Invoice')
@@ -143,16 +143,14 @@ class RemittancePaymentVoucher(Document):
         inv.flags.ignore_permissions = True
         inv.run_method("set_missing_values")
         inv.run_method("calculate_taxes_and_totals")
-        inv.run_method("get_advances")
-        # Get advance does not allocate if we have no sales order linked to the Advance Journal Entry. So we do it now.
-        adv = inv.get('advances')
-        # Advances are sorted by posting date ASC. We want the latest one thus the [len(adv) - 1] index below.
-        adv[len(adv) - 1].set('allocated_amount', flt(inv.get('grand_total')))
+
+        self.alloc_advances(inv, adv_journal_entry)
+
         inv.set('remittance_reference', self.name)
         inv.save()
         inv.submit()
 
-    def create_management_fee_invoice(self):
+    def create_management_fee_invoice(self, adv_journal_entry):
         if self.get("management_fee") == 0:
             return
         inv = frappe.new_doc('Sales Invoice')
@@ -176,14 +174,24 @@ class RemittancePaymentVoucher(Document):
         inv.flags.ignore_permissions = True
         inv.run_method("set_missing_values")
         inv.run_method("calculate_taxes_and_totals")
-        inv.run_method("get_advances")
-        # Get advance does not allocate if we have no sales order linked to the Advance Journal Entry. So we do it now.
-        adv = inv.get('advances')
-        # Advances are sorted by posting date ASC. We want the latest one thus the [len(adv) - 1] index below.
-        adv[len(adv) - 1].set('allocated_amount', flt(inv.get('grand_total')))
+
+        self.alloc_advances(inv, adv_journal_entry)
+
         inv.set('remittance_reference', self.name)
         inv.save()
         inv.submit()
+
+    def alloc_advances(self, inv, adv_je):
+        inv.run_method("set_advances")
+        # set_advance call above does not allocate if we have no sales order
+        # linked to the Advance Journal Entry. So we do it now... we want the advance coming from the advance
+        # payment journal we just made
+        adv = next((ad for ad in inv.get('advances') if ad.get('reference_name') == adv_je.name), None)
+        if not adv:
+            frappe.throw(_("Advance Payment allocation error during Remittance Payment processing. "
+                           "Please contact support."))
+        adv.set('allocated_amount', flt(inv.get('grand_total')))
+        return adv
 
     def create_advance(self):
         journal_entry = frappe.new_doc('Journal Entry')
@@ -209,3 +217,4 @@ class RemittancePaymentVoucher(Document):
         journal_entry.flags.ignore_permissions = True
         journal_entry.save()
         journal_entry.submit()
+        return journal_entry

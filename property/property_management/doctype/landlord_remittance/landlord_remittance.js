@@ -49,14 +49,16 @@ frappe.ui.form.on('Landlord Remittance', {
             method: "init_values",
             doc: frm.doc,
             callback: function(r, rt) {
-                frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
+                frm.fields_dict.load_remittance_data.$input
+                && frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
                 frm.refresh()
             }
         });
     },
 
     include_unpaid_invoices: function(frm) {
-        frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
+        frm.fields_dict.load_remittance_data.$input
+        && frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
     },
 
     load_remittance_data: function(frm) {
@@ -72,16 +74,19 @@ frappe.ui.form.on('Landlord Remittance', {
             method: "get_details",
             doc: frm.doc,
             callback: function(r, rt) {
-                frm.fields_dict.load_remittance_data.$input.removeClass("btn-primary");
+                frm.fields_dict.load_remittance_data.$input
+                && frm.fields_dict.load_remittance_data.$input.removeClass("btn-primary");
                 frm.refresh()
             }
         });
     },
     expense_period_start: function(frm) {
-        frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
+        frm.fields_dict.load_remittance_data.$input
+        && frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
     },
     expense_period_end: function(frm) {
-        frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
+        frm.fields_dict.load_remittance_data.$input
+        && frm.fields_dict.load_remittance_data.$input.addClass("btn-primary");
     }
 });
 
