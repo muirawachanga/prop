@@ -318,5 +318,13 @@
   "modified": "2016-03-05 01:06:58.339304", 
   "name": "Property Manager", 
   "role_name": "Property Manager"
+ }, 
+ {
+  "disabled": 0, 
+  "docstatus": 0, 
+  "doctype": "Role", 
+  "modified": "2016-10-02 08:52:43.355884", 
+  "name": "Property Management Alerts", 
+  "role_name": "Property Management Alerts"
  }
 ]

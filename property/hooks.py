@@ -57,7 +57,7 @@ after_install = "property.install.after_install"
 # notification_config = "property.notifications.get_notification_config"
 
 fixtures = ["Custom Field", "Custom Script", "Workflow State", "Workflow Action", "Workflow", "Role", "Customer Group",
-            "Item Group"]
+            "Item Group", "Email Alert"]
 
 # Permissions
 # -----------
