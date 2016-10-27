@@ -48,13 +48,16 @@ app_license = "GNU"
 # before_install = "property.install.before_install"
 # after_install = "property.install.after_install"
 
+after_install = "property.install.after_install"
+
 # Desk Notifications
 # ------------------
 # See frappe.core.notifications.get_notification_config
 
 # notification_config = "property.notifications.get_notification_config"
 
-fixtures = ["Custom Field", "Custom Script", "Workflow State", "Workflow Action", "Workflow", "Role", "Customer Group", "Item Group"]
+fixtures = ["Custom Field", "Custom Script", "Workflow State", "Workflow Action", "Workflow", "Role", "Customer Group",
+            "Item Group", "Email Alert"]
 
 # Permissions
 # -----------
@@ -80,6 +83,14 @@ fixtures = ["Custom Field", "Custom Script", "Workflow State", "Workflow Action"
 #	}
 # }
 
+doc_events = {
+    "Sales Invoice": {
+        "before_insert": "property.property_management.hooks.doc_hooks.sales_invoice_arrears",
+        "before_submit": "property.property_management.hooks.doc_hooks.sales_invoice_arrears",
+        "before_cancel": "property.property_management.hooks.doc_hooks.sales_invoice_cancel"
+    }
+}
+
 # Scheduled Tasks
 # ---------------
 
@@ -104,7 +115,7 @@ fixtures = ["Custom Field", "Custom Script", "Workflow State", "Workflow Action"
 # Testing
 # -------
 
-# before_tests = "property.install.before_tests"
+before_tests = "property.install.before_tests"
 
 # Overriding Whitelisted Methods
 # ------------------------------

@@ -7,11 +7,13 @@ Patch Landlord Remittance after adding an autonaming column we need to rename ex
 '''
 
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
     lr_list = frappe.get_list('Landlord Remittance', fields=["name"], filters=[], order_by="creation")
-    #Rename documents
+    # Rename documents
     start_val = 1
     prefix = 'LAR-'
     for n in lr_list:
