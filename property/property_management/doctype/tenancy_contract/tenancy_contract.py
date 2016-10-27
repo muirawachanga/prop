@@ -227,15 +227,14 @@ def bill_utility_item(ui_measurement_doc, item, source, target):
 def process_utility_items(source, target):
     u_items = [i for i in source.get('items') if i.is_utility_item]
 
-    """If we are not to invoice this utility item (it is not in the inv items), we skip it..."""
-    utility_inv_item = [i for i in target.get('items') if i.item_code == u_items.item_code]
-    if not utility_inv_item:
-        return;
-
     """We hold all the uim items that we bill here. We update them later after saving this invoice."""
     target.utility_items_measurements = []
 
     for item in u_items:
+        """If we are not to invoice this utility item (it is not in the inv items), we skip it..."""
+        utility_inv_item = [i for i in target.get('items') if i.item_code == item.item_code]
+        if not utility_inv_item:
+            continue;
         utility_item = frappe.get_doc('Utility Item', item.utility_item)
         ui_measurement = frappe.get_list('Utility Item Measurement', fields=['*'], filters=[
             ['tenancy_contract', '=', source.name], ['utility_item', '=', utility_item.name],
