@@ -204,7 +204,7 @@ def prorate_items(source, target):
 
     for it in inv_items:
         tc_it = [i for i in tc_items if i.item_code == it.item_code][0]
-        if getdate(tc_it.start_date) > getdate(period.start_date):
+        if not tc_it.is_utility_item and getdate(tc_it.start_date) > getdate(period.start_date):
             prorate(it, tc_it, period)
 
 
