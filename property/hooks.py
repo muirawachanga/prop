@@ -8,7 +8,7 @@ app_description = "Allows Property Management Agencies to manage properties"
 app_icon = "fa fa-building"
 app_color = "green"
 app_email = "info@bituls.com"
-app_version = "0.0.1"
+app_version = "0.1.2"
 app_license = "GNU"
 
 # Includes in <head>
@@ -57,7 +57,7 @@ after_install = "property.install.after_install"
 # notification_config = "property.notifications.get_notification_config"
 
 fixtures = ["Custom Field", "Custom Script", "Workflow State", "Workflow Action", "Workflow", "Role", "Customer Group",
-            "Item Group"]
+            "Item Group", "Email Alert"]
 
 # Permissions
 # -----------
@@ -111,6 +111,12 @@ doc_events = {
 # 		"property.tasks.monthly"
 # 	]
 # }
+
+scheduler_events = {
+    "daily": [
+        "property.property_management.tasks.generate_tc_invoices.daily"
+    ]
+}
 
 # Testing
 # -------

@@ -204,7 +204,7 @@ def prorate_items(source, target):
 
     for it in inv_items:
         tc_it = [i for i in tc_items if i.item_code == it.item_code][0]
-        if getdate(tc_it.start_date) > getdate(period.start_date):
+        if not tc_it.is_utility_item and getdate(tc_it.start_date) > getdate(period.start_date):
             prorate(it, tc_it, period)
 
 
@@ -222,6 +222,21 @@ def bill_utility_item(ui_measurement_doc, item, source, target):
     if utility_item.measurement_type == 'Monetary Amount':
         inv_item.set('rate', ui_measurement_doc.monetary_amount)
     ui_measurement_doc.set('usage_units', inv_item.get('qty'))
+
+    # Improve the item description
+    if utility_item.measurement_type != 'Monetary Amount':
+        desc = inv_item.get('description') + ' - ' + 'Based on: ' + utility_item.measurement_type \
+               + ': ' + str(usage)
+        inv_item.set('description', desc)
+
+    # Check for minimum charges..
+    if utility_item.measurement_type != 'Monetary Amount' and utility_item.minimum_charge > 0:
+        if ui_measurement_doc.usage_units < utility_item.minimum_charge_units:
+            inv_item.set('rate', utility_item.minimum_charge)
+            inv_item.set('qty', 1)
+            desc = inv_item.get('description') + " (Minimum Charges Applied)"
+            inv_item.set('description', desc)
+
 
 
 def process_utility_items(source, target):
