@@ -224,21 +224,3 @@ cur_frm.cscript.remit_full_amount = function(doc, cdt, cdn) {
     }
 };
 
-cur_frm.cscript.is_utility_item = function(doc, cdt, cdn) {
-    if (frappe.model.get_value(cdt, cdn, "is_utility_item")) {
-        var f = frappe.utils.filter_dict(cur_frm.fields_dict["items"].grid.grid_rows_by_docname[cdn].docfields, {
-            'fieldname': "utility_item"
-        })[0];
-        f.read_only = 0;
-        f.reqd = 0; //Should set to 1 but that breaks because you can no longer save the form
-        cur_frm.fields_dict["items"].grid.grid_rows_by_docname[cdn].fields_dict["utility_item"].refresh();
-    } else {
-        var f = frappe.utils.filter_dict(cur_frm.fields_dict["items"].grid.grid_rows_by_docname[cdn].docfields, {
-            'fieldname': "utility_item"
-        })[0];
-        frappe.model.set_value(cdt, cdn, "utility_item", "");
-        f.read_only = 1;
-        f.reqd = 0;
-        cur_frm.fields_dict["items"].grid.grid_rows_by_docname[cdn].fields_dict["utility_item"].refresh();
-    }
-};
