@@ -112,6 +112,12 @@ doc_events = {
 # 	]
 # }
 
+scheduler_events = {
+    "daily": [
+        "property.property_management.tasks.generate_tc_invoices.daily"
+    ]
+}
+
 # Testing
 # -------
 
