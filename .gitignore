@@ -3,5 +3,6 @@
 *.egg-info
 *.swp
 tags
+.idea
 property/docs/current
 property/docs
