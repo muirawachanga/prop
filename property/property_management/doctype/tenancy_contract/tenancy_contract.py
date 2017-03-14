@@ -161,16 +161,13 @@ def remove_items(target, items):
 
 def validate_items(source, target):
     tc_items = source.get('items')
-    last_inv = get_last_tc_invoice(source.name)
     inv_items_to_remove = []
     # Remove items that should not be included in this invoice based on their characteristics in TC items
 
     for tc_i in tc_items:
-        # Remove non recurring based on if a prev invoice exists and start of billing for this item is due.
-        # We assume it must have already been billed
-        if last_inv:
-            if not tc_i.get('recurring') and tc_i.get('is_billed'):
-                    inv_items_to_remove.append(tc_i)
+        # Remove non recurring items that have already been billed
+        if not tc_i.get('recurring') and tc_i.get('is_billed'):
+                inv_items_to_remove.append(tc_i)
         # Remove items whose start of billing is not yet due
         if getdate(tc_i.get('start_date')) > target.get('posting_date'):
             if tc_i not in inv_items_to_remove:
