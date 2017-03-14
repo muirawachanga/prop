@@ -8,7 +8,7 @@ app_description = "Allows Property Management Agencies to manage properties"
 app_icon = "fa fa-building"
 app_color = "green"
 app_email = "info@bituls.com"
-app_version = "0.1.3"
+app_version = "0.1.4"
 app_license = "GNU"
 
 # Includes in <head>
