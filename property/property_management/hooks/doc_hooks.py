@@ -36,5 +36,22 @@ def reset_utility_item_measurement_billing(doc, event):
         utm.save()
 
 
+def reset_tc_is_billed_items(doc, event):
+    if doc.tenancy_contract in (None, ''):
+        return
+    tc = frappe.get_doc('Tenancy Contract', doc.tenancy_contract)
+    i_items = doc.get("items")
+    tc_items = tc.get("items")
+
+    for it in i_items:
+        tc_it = [i for i in tc_items if i.item_code == it.item_code]
+        if len(tc_it) < 1:
+            continue
+        if not tc_it[0].recurring:
+            tc_it[0].set('is_billed', False)
+            tc_it[0].db_update()
+
+
 def sales_invoice_cancel(doc, event):
+    reset_tc_is_billed_items(doc, event)
     reset_utility_item_measurement_billing(doc, event)
