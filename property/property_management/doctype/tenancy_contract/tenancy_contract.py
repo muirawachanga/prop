@@ -169,8 +169,7 @@ def validate_items(source, target):
         # Remove non recurring based on if a prev invoice exists and start of billing for this item is due.
         # We assume it must have already been billed
         if last_inv:
-            if not tc_i.get('recurring'):
-                if getdate(tc_i.get('start_date')) <= last_inv.get('posting_date'):
+            if not tc_i.get('recurring') and tc_i.get('is_billed'):
                     inv_items_to_remove.append(tc_i)
         # Remove items whose start of billing is not yet due
         if getdate(tc_i.get('start_date')) > target.get('posting_date'):
@@ -271,12 +270,25 @@ def process_utility_items(source, target):
         bill_utility_item(ui_measurement_doc, item, source, target)
         target.utility_items_measurements.append(ui_measurement_doc)
 
+
 def validate_dates_before_invoice_gen(tc_doc):
     delta = timedelta(days=tc_doc.grace_period)
     # Account for Grace Period to allow invoice generation if today is >= date_of_first_billing - grace_period (days)
     if getdate() < getdate(tc_doc.date_of_first_billing) + delta:
         frappe.throw(_('Cannot create invoice for this contract. Date of First Billing plus Billing Grace Period'
                        ' is greater than today.'))
+
+
+def set_billed_non_recurrent_items(tc, inv):
+    i_items = inv.get("items")
+    tc_items = tc.get("items")
+
+    for it in i_items:
+        tc_it = [i for i in tc_items if i.item_code == it.item_code][0]
+        if not tc_it.recurring:
+            tc_it.set('is_billed', True)
+            tc_it.db_update()
+
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
@@ -289,6 +301,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
         validate_items(source, target)
         process_utility_items(source, target)
         prorate_items(source, target)
+        #Update non recurrent tenancy contract items to billed.
+        set_billed_non_recurrent_items(source, target)
         set_missing_values(source, target)
         # Get the advance paid Journal Entries in Sales Invoice Advance
         target.run_method('set_advances')
