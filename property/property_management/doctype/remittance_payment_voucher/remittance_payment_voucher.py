@@ -47,7 +47,7 @@ class RemittancePaymentVoucher(Document):
             dr_entry.account = source.get("trust_fund_account")
             dr_entry.debit_in_account_currency = source.get("amount_paid")
             dr_entry.reference_type = 'Remittance Payment Voucher'
-            dr_entry.reference_name = self.name
+            # dr_entry.reference_name = self.name //TODO make a query in the custom script
 
             target.set("posting_date", source.get("posting_date"))
             target.set("user_remark", target.get('user_remark') or "" +
@@ -196,7 +196,7 @@ class RemittancePaymentVoucher(Document):
     def create_advance(self):
         journal_entry = frappe.new_doc('Journal Entry')
         journal_amt = flt(self.get("management_fee") + self.get('deductible_expenses'))
-        if journal_amt == 0:
+        if journal_amt == 0.0:
             return
         cr_entry = journal_entry.append("accounts", {})
         cr_entry.account = get_party_account('Customer', self.get_customer_name(), journal_entry.company)
@@ -209,7 +209,7 @@ class RemittancePaymentVoucher(Document):
         dr_entry.account = self.get("trust_fund_account")
         dr_entry.debit_in_account_currency = journal_amt
         dr_entry.reference_type = 'Remittance Payment Voucher'
-        dr_entry.reference_name = self.name
+        # dr_entry.reference_name = self.name //TODO make a query in the custom script
         journal_entry.set("posting_date", self.get("posting_date"))
         journal_entry.set("user_remark", journal_entry.get('user_remark') or "" +
                           " Being management fee / Reimbursed Expenses settlement for Landlord Remittance No: " + self.get(

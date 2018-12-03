@@ -14,12 +14,7 @@ from datetime import timedelta
 
 
 class TenancyContract(Document):
-    def __init__(self, arg1, arg2=None):
-        super(TenancyContract, self).__init__(arg1, arg2)
-        self.lock_items = frappe.db.get_single_value('Property Management Settings', 'lock_tenancy_contract_items')
-        self.old_items_names = []
-        if self.contract_status != 'New':
-            self.old_items_names = [i.name for i in self.get("items")]
+    pass
 
     def validate(self):
         self.validate_property_unit()
@@ -55,6 +50,10 @@ class TenancyContract(Document):
         frappe.throw(_("An Active Tenancy Contract already exists in this property unit. Cannot create contract."))
 
     def validate_items(self):
+        self.lock_items = frappe.db.get_single_value('Property Management Settings', 'lock_tenancy_contract_items')
+        self.old_items_names = []
+        if self.contract_status != 'New':
+            self.old_items_names = [i.name for i in self.get("items")]
         items = self.get("items")
         if self.get("contract_status") == 'Active':
             if not len(items):
@@ -155,6 +154,8 @@ def remove_items(target, items):
     curr_items = target.get("items")
     item_codes_to_remove = [i.item_code for i in items]
     items_to_remove = [item for item in curr_items if item.item_code in item_codes_to_remove]
+    frappe.msgprint(_(items_to_remove))
+    frappe.msgprint(_('was exec'))
     for i in items_to_remove:
         curr_items.remove(i)
 
@@ -245,7 +246,8 @@ def process_utility_items(source, target):
         """If we are not to invoice this utility item (it is not in the inv items), we skip it..."""
         utility_inv_item = [i for i in target.get('items') if i.item_code == item.item_code]
         if not utility_inv_item:
-            continue;
+            frappe.msgprint(_('am inside'))
+            continue
         utility_item = frappe.get_doc('Utility Item', item.utility_item)
         ui_measurement = frappe.get_list('Utility Item Measurement', fields=['*'], filters=[
             ['tenancy_contract', '=', source.name], ['utility_item', '=', utility_item.name],
@@ -338,3 +340,17 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 def verify_items(tc_doc):
     if not len(tc_doc.items):
         frappe.throw(_('No Contract Items to invoice for this contract.'))
+
+def send_email_function(doctype):
+    comments = 'Find the tenancy fees payment'
+    recipient_email = 'wachangasteve@gmail.com'
+    my_attachments = [frappe.attach_print(doctype.doctype, doctype.name, file_name=doctype.name)]
+    frappe.sendmail(
+        recipients=recipient_email,
+        sender='teresterltd@gmail.com',
+        subject=doctype.name,
+        message=comments,
+        # reference_doctype=doctype,
+        # reference_name=doctype.name
+        attachments=my_attachments
+    )

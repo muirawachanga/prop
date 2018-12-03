@@ -5,19 +5,21 @@
 from __future__ import unicode_literals
 
 import frappe
+from frappe import _
 from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
 
 
 class PropertyUnit(Document):
-    def __init__(self, arg1, arg2=None):
-        super(PropertyUnit, self).__init__(arg1, arg2)
+    # def __init__(self, arg1, arg2=None):
+    #     super(PropertyUnit, self).__init__(arg1, arg2)
 
     def validate(self):
-        combo_name = self.property_name + ' - ' + self.unit_name
-        self.set("unit_name", combo_name)
+        if (self.property_name not in self.unit_name):
+            combo_name = self.property_name + ' - ' + self.unit_name
+            self.set("unit_name", combo_name)
 
-
+@frappe.whitelist()
 def property_unit_query(doctype, txt, searchfield, start, page_len, filters):
     # Select only property units that don't have Tenancy Contracts that are in specific statuses.
     # Specify these filters in filters["tc_filters"]. e.g:

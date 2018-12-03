@@ -24,7 +24,7 @@ def daily():
         gen_date = 26
 
     d = getdate()
-    if d.day != gen_date:
+    if str(d.day) != str(gen_date):
         log.info("Not generating invoices today. Current date is %s "
                  "while date of generation is configured as %s. Skipping...", today, gen_date)
         return

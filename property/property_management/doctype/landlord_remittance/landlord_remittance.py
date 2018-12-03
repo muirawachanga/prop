@@ -12,8 +12,8 @@ from frappe.utils import flt
 
 
 class LandlordRemittance(Document):
-    def __init__(self, arg1, arg2=None):
-        super(LandlordRemittance, self).__init__(arg1, arg2)
+    # def __init__(self, arg1, arg2=None):
+    #     super(LandlordRemittance, self).__init__(arg1, arg2)
 
     def init_values(self):
         # Get start end dates for collections and expenses based on min max invoice dates not remitted.
@@ -30,7 +30,7 @@ class LandlordRemittance(Document):
                                             td.property = tp.name and td.name = '%s' and ti.name not in
                                             (select lei.invoice from `tabLandlord Expense Invoices` lei, `tabLandlord Remittance` lr
                                             where lr.owner_contract = '%s' and lr.name = lei.parent and lei.docstatus <> 2)
-                                            order by ti.posting_date;;
+                                            order by ti.posting_date;
                                             """ % (self.owner_contract, self.owner_contract), as_dict=0)
         if coll_dates[0][0]:
             self.set("collection_period_start", coll_dates[0][0])

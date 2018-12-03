@@ -104,11 +104,13 @@ frappe.ui.form.on('Tenancy Contract', {
                     return;
                 }*/
                 var items_grid = frm.fields_dict["items"].grid;
-                if(!items_grid.data_rows_are_same(loaded_tc_items)){
-                    msgprint(__("You cannot remove billing items from a contract in Active status. Not Saved."));
-                    validated = false;
-                    return;
-                }
+                console.log(frm)
+//                if(!items_grid.data_rows_are_same(loaded_tc_items)){
+//                    frappe.msgprint(__("You cannot remove billing items from a contract in Active status. Not Saved."));
+//                    console.log("am inside");
+//                    frappe.validated = false;
+//                    return;
+//                }
                 for (var i = 0; i < items.length; i++) {
                     if(items[i].is_utility_item){
                         if(!items[i].utility_item){
