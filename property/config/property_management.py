@@ -98,6 +98,16 @@ def get_data():
                         "Create and manage Utility Items to be used for utility services billing e.g. water"
                         ", electricity etc.")
                 },
+                {
+                    "type": "doctype",
+                    "name": "Landlord Email Digest",
+                    "description": _("This is used to send email digest to the landlord")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Hand Over",
+                    "description": _("This is used to facilitate the handover process")
+                }
             ]
         },
         {

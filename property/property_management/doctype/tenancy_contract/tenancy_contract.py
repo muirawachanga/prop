@@ -39,6 +39,11 @@ class TenancyContract(Document):
             if not self.cancellation_date:
                 frappe.throw(
                     _("You must set the contract cancellation date before cancelling"))
+        if self.email_invoice:
+            if not self.tenant_email:
+                frappe.throw(
+                    _("You must set the email of the tenant where the invoice will be sent"))
+
 
     def validate_property_unit(self):
         exists = frappe.get_list(self.doctype, fields=["name"], filters=[["property_unit", "=", self.property_unit],
@@ -334,6 +339,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
         uim.set_billed(invoice)
         uim.save()
     invoice.submit()
+    # send the email to the customers:
+    send_email_function(invoice, tc_doc)
     return invoice
 
 
@@ -341,16 +348,14 @@ def verify_items(tc_doc):
     if not len(tc_doc.items):
         frappe.throw(_('No Contract Items to invoice for this contract.'))
 
-def send_email_function(doctype):
-    comments = 'Find the tenancy fees payment'
-    recipient_email = 'wachangasteve@gmail.com'
-    my_attachments = [frappe.attach_print(doctype.doctype, doctype.name, file_name=doctype.name)]
-    frappe.sendmail(
-        recipients=recipient_email,
-        sender='teresterltd@gmail.com',
-        subject=doctype.name,
-        message=comments,
-        # reference_doctype=doctype,
-        # reference_name=doctype.name
-        attachments=my_attachments
-    )
+def send_email_function(doctype, tc_doc):
+    comments = 'Find the attached invoice payment'
+    if tc_doc.email_invoice:
+        recipient_email = tc_doc.tenant_email
+        my_attachments = [frappe.attach_print(doctype.doctype, doctype.name, file_name=doctype.name)]
+        frappe.sendmail(
+            recipients=recipient_email,
+            subject=doctype.name,
+            message=comments,
+            attachments=my_attachments
+        )

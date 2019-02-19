@@ -1,6 +1,70 @@
 [
  {
   "attach_print": 0, 
+  "condition": null, 
+  "date_changed": null, 
+  "days_in_advance": 0, 
+  "docstatus": 0, 
+  "doctype": "Email Alert", 
+  "document_type": "Training Event", 
+  "enabled": 1, 
+  "event": "Submit", 
+  "is_standard": 1, 
+  "message": "<h3>{{_(\"Training Event\")}}</h3>\n\n<p>{{ doc.introduction }}</p>\n\n<h4>{{_(\"Details\")}}</h4>\n{{_(\"Event Name\")}}: {{ frappe.utils.get_link_to_form(doc.doctype, doc.name) }}\n<br>{{_(\"Event Location\")}}: {{ doc.location }}\n<br>{{_(\"Start Time\")}}: {{ doc.start_time }}\n<br>{{_(\"End Time\")}}: {{ doc.end_time }}\n", 
+  "method": null, 
+  "modified": "2017-08-13 22:49:42.338881", 
+  "module": "HR", 
+  "name": "Training Scheduled", 
+  "print_format": null, 
+  "property_value": null, 
+  "recipients": [
+   {
+    "cc": null, 
+    "condition": null, 
+    "email_by_document_field": "employee_emails", 
+    "email_by_role": null
+   }
+  ], 
+  "sender": null, 
+  "sender_email": null, 
+  "set_property_after_alert": null, 
+  "subject": "Training Scheduled: {{ doc.name }}", 
+  "value_changed": null
+ }, 
+ {
+  "attach_print": 0, 
+  "condition": null, 
+  "date_changed": null, 
+  "days_in_advance": 0, 
+  "docstatus": 0, 
+  "doctype": "Email Alert", 
+  "document_type": "Training Result", 
+  "enabled": 1, 
+  "event": "Submit", 
+  "is_standard": 1, 
+  "message": "<h3>{{_(\"Training Event\")}}</h3>\n<p>{{ message }}</p>\n\n<h4>{{_(\"Details\")}}</h4>\n{{_(\"Event Name\")}}: <a href=\"{{ event_link }}\">{{ name }}</a>\n<br>{{_(\"Event Location\")}}: {{ location }}\n<br>{{_(\"Start Time\")}}: {{ start_time }}\n<br>{{_(\"End Time\")}}: {{ end_time }}\n<br>{{_(\"Attendance\")}}: {{ attendance }}\n", 
+  "method": null, 
+  "modified": "2017-08-11 04:26:58.194793", 
+  "module": "HR", 
+  "name": "Training Feedback", 
+  "print_format": null, 
+  "property_value": null, 
+  "recipients": [
+   {
+    "cc": null, 
+    "condition": null, 
+    "email_by_document_field": "employee_emails", 
+    "email_by_role": null
+   }
+  ], 
+  "sender": null, 
+  "sender_email": null, 
+  "set_property_after_alert": null, 
+  "subject": "Please Share your Feedback For {{ doc.training_event }}", 
+  "value_changed": null
+ }, 
+ {
+  "attach_print": 0, 
   "condition": "doc.contract_status==\"Active\"", 
   "date_changed": "end_date", 
   "days_in_advance": 15, 
@@ -9,9 +73,14 @@
   "document_type": "Tenancy Contract", 
   "enabled": 1, 
   "event": "Days Before", 
+  "is_standard": 0, 
   "message": "<h3>Expiring Tenancy Contract Alert</h3>\n\n<p>The Tenancy Contract {{ doc.name }} has an End Date of {{ doc.end_date }} and will expire within 15 days. Please take necessary action.</p>\n\n<!-- show last comment -->\n{% if comments %}\nLast comment: {{ comments[-1].comment }} by {{ comments[-1].by }}\n{% endif %}\n\n<h4>Details</h4>\n\n<ul>\n<li>Property: {{ doc.property_name }}\n</li><li>Property Unit: {{ doc.property_unit_name }}\n</li><li>Customer: {{ doc.customer }}\n</li><li>End Date: {{ doc.end_date }}\n</li></ul>", 
+  "method": null, 
   "modified": "2016-10-02 08:54:37.212504", 
+  "module": null, 
   "name": "15 Days - Tenancy Contract Expiry Alert: {{ doc.name }} - {{ doc.customer }} - {{ doc.property_unit_name }}", 
+  "print_format": null, 
+  "property_value": null, 
   "recipients": [
    {
     "cc": "", 
@@ -20,6 +89,9 @@
     "email_by_role": "Property Management Alerts"
    }
   ], 
+  "sender": null, 
+  "sender_email": null, 
+  "set_property_after_alert": null, 
   "subject": "15 Days - Tenancy Contract Expiry Alert: {{ doc.name }} - {{ doc.customer }} - {{ doc.property_unit_name }}", 
   "value_changed": null
  }, 
@@ -33,9 +105,14 @@
   "document_type": "Tenancy Contract", 
   "enabled": 1, 
   "event": "Days Before", 
+  "is_standard": 0, 
   "message": "<h3>Expiring Tenancy Contract Alert</h3>\n\n<p>The Tenancy Contract {{ doc.name }} has an End Date of {{ doc.end_date }} and will expire within 15 days. Please take necessary action.</p>\n\n<!-- show last comment -->\n{% if comments %}\nLast comment: {{ comments[-1].comment }} by {{ comments[-1].by }}\n{% endif %}\n\n<h4>Details</h4>\n\n<ul>\n<li>Property: {{ doc.property_name }}\n</li><li>Property Unit: {{ doc.property_unit_name }}\n</li><li>Customer: {{ doc.customer }}\n</li><li>End Date: {{ doc.end_date }}\n</li></ul>", 
+  "method": null, 
   "modified": "2016-10-02 08:53:29.746585", 
+  "module": null, 
   "name": "30 Days - Tenancy Contract Expiry Alert: {{ doc.name }} - {{ doc.customer }} - {{ doc.property_unit_name }}", 
+  "print_format": null, 
+  "property_value": null, 
   "recipients": [
    {
     "cc": "", 
@@ -44,6 +121,9 @@
     "email_by_role": "Property Management Alerts"
    }
   ], 
+  "sender": null, 
+  "sender_email": null, 
+  "set_property_after_alert": null, 
   "subject": "30 Days - Tenancy Contract Expiry Alert: {{ doc.name }} - {{ doc.customer }} - {{ doc.property_unit_name }}", 
   "value_changed": null
  }, 
@@ -57,9 +137,14 @@
   "document_type": "Tenancy Contract", 
   "enabled": 1, 
   "event": "Days Before", 
+  "is_standard": 0, 
   "message": "<h3>Expiring Tenancy Contract Alert</h3>\n\n<p>The Tenancy Contract {{ doc.name }} has an End Date of {{ doc.end_date }} and will expire within 10 days. Please take necessary action.</p>\n\n<!-- show last comment -->\n{% if comments %}\nLast comment: {{ comments[-1].comment }} by {{ comments[-1].by }}\n{% endif %}\n\n<h4>Details</h4>\n\n<ul>\n<li>Property: {{ doc.property_name }}\n</li><li>Property Unit: {{ doc.property_unit_name }}\n</li><li>Customer: {{ doc.customer }}\n</li><li>End Date: {{ doc.end_date }}\n</li></ul>", 
+  "method": null, 
   "modified": "2016-10-02 08:53:45.322131", 
+  "module": null, 
   "name": "10 Days - Tenancy Contract Expiry Alert: {{ doc.name }} - {{ doc.customer }} - {{ doc.property_unit_name }}", 
+  "print_format": null, 
+  "property_value": null, 
   "recipients": [
    {
     "cc": "", 
@@ -68,6 +153,9 @@
     "email_by_role": "Property Management Alerts"
    }
   ], 
+  "sender": null, 
+  "sender_email": null, 
+  "set_property_after_alert": null, 
   "subject": "10 Days - Tenancy Contract Expiry Alert: {{ doc.name }} - {{ doc.customer }} - {{ doc.property_unit_name }}", 
   "value_changed": null
  }, 
@@ -81,9 +169,14 @@
   "document_type": "Tenancy Contract", 
   "enabled": 1, 
   "event": "Days Before", 
+  "is_standard": 0, 
   "message": "<h3>Expiring Tenancy Contract Alert</h3>\n\n<p>The Tenancy Contract {{ doc.name }} has an End Date of {{ doc.end_date }} and will expire within 5 days. Please take necessary action.</p>\n\n<!-- show last comment -->\n{% if comments %}\nLast comment: {{ comments[-1].comment }} by {{ comments[-1].by }}\n{% endif %}\n\n<h4>Details</h4>\n\n<ul>\n<li>Property: {{ doc.property_name }}\n</li><li>Property Unit: {{ doc.property_unit_name }}\n</li><li>Customer: {{ doc.customer }}\n</li><li>End Date: {{ doc.end_date }}\n</li></ul>", 
+  "method": null, 
   "modified": "2016-10-02 08:53:56.867700", 
+  "module": null, 
   "name": "5 Days - Tenancy Contract Expiry Alert: {{ doc.name }} - {{ doc.customer }} - {{ doc.property_unit_name }}", 
+  "print_format": null, 
+  "property_value": null, 
   "recipients": [
    {
     "cc": "", 
@@ -92,6 +185,9 @@
     "email_by_role": "Property Management Alerts"
    }
   ], 
+  "sender": null, 
+  "sender_email": null, 
+  "set_property_after_alert": null, 
   "subject": "5 Days - Tenancy Contract Expiry Alert: {{ doc.name }} - {{ doc.customer }} - {{ doc.property_unit_name }}", 
   "value_changed": null
  }, 
@@ -105,9 +201,14 @@
   "document_type": "Tenancy Contract", 
   "enabled": 1, 
   "event": "Days Before", 
+  "is_standard": 0, 
   "message": "<h3>Expiring Tenancy Contract Alert</h3>\n\n<p>The Tenancy Contract {{ doc.name }} has an End Date of {{ doc.end_date }} and will expire within 2 days. Please take necessary action.</p>\n\n<!-- show last comment -->\n{% if comments %}\nLast comment: {{ comments[-1].comment }} by {{ comments[-1].by }}\n{% endif %}\n\n<h4>Details</h4>\n\n<ul>\n<li>Property: {{ doc.property_name }}\n</li><li>Property Unit: {{ doc.property_unit_name }}\n</li><li>Customer: {{ doc.customer }}\n</li><li>End Date: {{ doc.end_date }}\n</li></ul>", 
+  "method": null, 
   "modified": "2016-10-02 08:54:07.546419", 
+  "module": null, 
   "name": "2 Days - Tenancy Contract Expiry Alert: {{ doc.name }} - {{ doc.customer }} - {{ doc.property_unit_name }}", 
+  "print_format": null, 
+  "property_value": null, 
   "recipients": [
    {
     "cc": "", 
@@ -116,6 +217,9 @@
     "email_by_role": "Property Management Alerts"
    }
   ], 
+  "sender": null, 
+  "sender_email": null, 
+  "set_property_after_alert": null, 
   "subject": "2 Days - Tenancy Contract Expiry Alert: {{ doc.name }} - {{ doc.customer }} - {{ doc.property_unit_name }}", 
   "value_changed": null
  }, 
@@ -129,9 +233,14 @@
   "document_type": "Tenancy Contract", 
   "enabled": 1, 
   "event": "Days Before", 
+  "is_standard": 0, 
   "message": "<h3>Expiring Tenancy Contract Alert</h3>\n\n<p>The Tenancy Contract {{ doc.name }} has an End Date of {{ doc.end_date }} and will expire within 15 days. Please take necessary action.</p>\n\n<!-- show last comment -->\n{% if comments %}\nLast comment: {{ comments[-1].comment }} by {{ comments[-1].by }}\n{% endif %}\n\n<h4>Details</h4>\n\n<ul>\n<li>Property: {{ doc.property_name }}\n</li><li>Property Unit: {{ doc.property_unit_name }}\n</li><li>Customer: {{ doc.customer }}\n</li><li>End Date: {{ doc.end_date }}\n</li></ul>", 
+  "method": null, 
   "modified": "2016-10-02 08:54:28.447481", 
+  "module": null, 
   "name": "1 Day - Tenancy Contract Expiry Alert: {{ doc.name }} - {{ doc.customer }} - {{ doc.property_unit_name }}", 
+  "print_format": null, 
+  "property_value": null, 
   "recipients": [
    {
     "cc": "", 
@@ -140,6 +249,9 @@
     "email_by_role": "Property Management Alerts"
    }
   ], 
+  "sender": null, 
+  "sender_email": null, 
+  "set_property_after_alert": null, 
   "subject": "1 Day - Tenancy Contract Expiry Alert: {{ doc.name }} - {{ doc.customer }} - {{ doc.property_unit_name }}", 
   "value_changed": null
  }, 
@@ -153,9 +265,14 @@
   "document_type": "Tenancy Contract", 
   "enabled": 1, 
   "event": "Days Before", 
+  "is_standard": 0, 
   "message": "<h3>Expiring Tenancy Contract Alert</h3>\n\n<p>The Tenancy Contract {{ doc.name }} has an End Date of {{ doc.end_date }} and has expired. Please take necessary action.</p>\n\n<!-- show last comment -->\n{% if comments %}\nLast comment: {{ comments[-1].comment }} by {{ comments[-1].by }}\n{% endif %}\n\n<h4>Details</h4>\n\n<ul>\n<li>Property: {{ doc.property_name }}\n</li><li>Property Unit: {{ doc.property_unit_name }}\n</li><li>Customer: {{ doc.customer }}\n</li><li>End Date: {{ doc.end_date }}\n</li></ul>", 
+  "method": null, 
   "modified": "2016-10-02 08:54:18.419445", 
+  "module": null, 
   "name": "Tenancy Contract Ended: {{ doc.name }} - {{ doc.customer }} - {{ doc.property_unit_name }}", 
+  "print_format": null, 
+  "property_value": null, 
   "recipients": [
    {
     "cc": "", 
@@ -164,6 +281,9 @@
     "email_by_role": "Property Management Alerts"
    }
   ], 
+  "sender": null, 
+  "sender_email": null, 
+  "set_property_after_alert": null, 
   "subject": "Tenancy Contract Ended: {{ doc.name }} - {{ doc.customer }} - {{ doc.property_unit_name }}", 
   "value_changed": null
  }

@@ -1,8 +1,6 @@
 [
  {
   "accounts": [], 
-  "credit_days": 0, 
-  "credit_days_based_on": "", 
   "credit_limit": 0.0, 
   "customer_group_name": "All Customer Groups", 
   "default_price_list": null, 
@@ -14,12 +12,11 @@
   "name": "All Customer Groups", 
   "old_parent": "", 
   "parent_customer_group": "", 
-  "rgt": 14
+  "payment_terms": null, 
+  "rgt": 16
  }, 
  {
   "accounts": [], 
-  "credit_days": 0, 
-  "credit_days_based_on": "", 
   "credit_limit": 0.0, 
   "customer_group_name": "Individual", 
   "default_price_list": null, 
@@ -31,12 +28,11 @@
   "name": "Individual", 
   "old_parent": "All Customer Groups", 
   "parent_customer_group": "All Customer Groups", 
+  "payment_terms": null, 
   "rgt": 3
  }, 
  {
   "accounts": [], 
-  "credit_days": 0, 
-  "credit_days_based_on": "", 
   "credit_limit": 0.0, 
   "customer_group_name": "Commercial", 
   "default_price_list": null, 
@@ -48,12 +44,11 @@
   "name": "Commercial", 
   "old_parent": "All Customer Groups", 
   "parent_customer_group": "All Customer Groups", 
+  "payment_terms": null, 
   "rgt": 5
  }, 
  {
   "accounts": [], 
-  "credit_days": 0, 
-  "credit_days_based_on": "", 
   "credit_limit": 0.0, 
   "customer_group_name": "Non Profit", 
   "default_price_list": null, 
@@ -65,12 +60,11 @@
   "name": "Non Profit", 
   "old_parent": "All Customer Groups", 
   "parent_customer_group": "All Customer Groups", 
+  "payment_terms": null, 
   "rgt": 7
  }, 
  {
   "accounts": [], 
-  "credit_days": 0, 
-  "credit_days_based_on": "", 
   "credit_limit": 0.0, 
   "customer_group_name": "Government", 
   "default_price_list": null, 
@@ -82,12 +76,11 @@
   "name": "Government", 
   "old_parent": "All Customer Groups", 
   "parent_customer_group": "All Customer Groups", 
+  "payment_terms": null, 
   "rgt": 9
  }, 
  {
   "accounts": [], 
-  "credit_days": 0, 
-  "credit_days_based_on": "", 
   "credit_limit": 0.0, 
   "customer_group_name": "Tenants", 
   "default_price_list": null, 
@@ -99,12 +92,11 @@
   "name": "Tenants", 
   "old_parent": "All Customer Groups", 
   "parent_customer_group": "All Customer Groups", 
+  "payment_terms": null, 
   "rgt": 11
  }, 
  {
   "accounts": [], 
-  "credit_days": 0, 
-  "credit_days_based_on": "", 
   "credit_limit": 0.0, 
   "customer_group_name": "Landlords", 
   "default_price_list": null, 
@@ -116,6 +108,7 @@
   "name": "Landlords", 
   "old_parent": "All Customer Groups", 
   "parent_customer_group": "All Customer Groups", 
+  "payment_terms": null, 
   "rgt": 13
  }
 ]

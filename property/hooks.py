@@ -113,6 +113,9 @@ doc_events = {
 # }
 
 scheduler_events = {
+    # "all":[
+    #     "property.property_management.doctype.landlord_email_digest.landlord_email_digest.send"
+    # ],
     "daily": [
         "property.property_management.tasks.generate_tc_invoices.daily"
     ]
